@@ -140,16 +140,13 @@ function CreateListing() {
         data={[
             'Wi-Fi',
             'Parking',
-            'Air Conditioning',
+            'AC',
             'Pool',
             'Kitchen',
             'Washer',
-            'Elevator',
             'Gym',
             'Balcony',
-            'Heating',
             'TV',
-            'Fireplace',
         ]}
         value={amenities}
         onChange={setAmenities}
