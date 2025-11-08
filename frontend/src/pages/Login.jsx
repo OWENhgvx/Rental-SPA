@@ -24,7 +24,7 @@ function Login() {
       }
 
       // Login success logic
-      // localStorage.setItem('token', data.token);
+      localStorage.setItem('token', data.token);
       // navigate('/dashboard'); // Or other page
     } catch (err) {
       setErrorMsg(err.message || 'Login failed, please try again.');
