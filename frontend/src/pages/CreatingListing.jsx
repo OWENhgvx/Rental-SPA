@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Title, TextInput, NumberInput, Select, Button, Image, Stack,MultiSelect } from '@mantine/core';
 import { useNavigate } from 'react-router-dom';
 
@@ -11,22 +11,39 @@ function CreateListing() {
   const [bathrooms,setBathroom] = useState(1);
   const [bedrooms,setBedrooms] = useState(1);
   const [amenities,setAmenities] = useState([]);
-  const [thumbnail, setThumbnail] = useState(null);
+  const [thumbnail, setThumbnail] = useState(null);  // base64 string
+  const [images, setImages] = useState([]);   
   const [errorMsg, setErrorMsg] = useState('');
 
-  // Handle image upload + preview
-  const handleImageUpload = (e) => {
+  // Convert a File object to Base64
+  const toBase64 = (file) => new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = (err) => reject(err);
+  });
+
+  // Single main thumbnail upload
+  const handleThumbnailUpload = async (e) => {
     const file = e.target.files[0];
     if (file) {
-      const previewUrl = URL.createObjectURL(file);
-      setThumbnail(previewUrl);
+      const base64 = await toBase64(file);
+      setThumbnail(base64);
     }
   };
 
-  // Submit Create Listing request
+  // Upload multiple images to metadata.images
+  const handleImagesUpload = async (e) => {
+    const selectedFiles = [...e.target.files];
+    if (selectedFiles.length) {
+      const base64Array = await Promise.all(selectedFiles.map(toBase64));
+      setImages(base64Array);  // override, or: setImages(prev => [...prev, ...base64Array])
+    }
+  };
+
   const handleSubmit = async () => {
-    if (!title || !address || !price || !propertyType) {
-      setErrorMsg('All fields are required.');
+    if (!title || !address || !price || !propertyType || !thumbnail) {
+      setErrorMsg('All fields including thumbnail are required.');
       return;
     }
 
@@ -48,7 +65,8 @@ function CreateListing() {
             bathrooms,
             bedrooms,
             amenities,
-           }
+            images,  
+          }
         })
       });
 
@@ -70,10 +88,20 @@ function CreateListing() {
       <Stack spacing="md" align="center">
         {/* Upload + Preview */}
         <div style={{ width: 600 }}>
-          <input type="file" accept="image/*" onChange={handleImageUpload} />
-          {thumbnail && (
-            <Image src={thumbnail} height={200} mt="md" radius="md" alt="preview" />
-          )}
+          <label>Main Thumbnail (Required)</label>
+          <input type="file" accept="image/*" onChange={handleThumbnailUpload} />
+          {thumbnail && <Image src={thumbnail} height={200} mt="md" alt="preview" />}
+        </div>
+
+        {/* Upload multiple gallery images */}
+        <div style={{ width: 600 }}>
+          <label>Gallery Images (Optional)</label>
+          <input type="file" accept="image/*" multiple onChange={handleImagesUpload} />
+          <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginTop: 10 }}>
+            {images.map((img, idx) => (
+              <Image key={idx} src={img} height={80} radius="sm" alt={`gallery-${idx}`} />
+            ))}
+          </div>
         </div>
 
         {/* Form Fields */}
@@ -135,9 +163,9 @@ function CreateListing() {
         />
 
         <MultiSelect
-        label="Property Amenities"
-        placeholder="Select amenities"
-        data={[
+          label="Property Amenities"
+          placeholder="Select amenities"
+          data={[
             'Wi-Fi',
             'Parking',
             'AC',
@@ -147,13 +175,13 @@ function CreateListing() {
             'Gym',
             'Balcony',
             'TV',
-        ]}
-        value={amenities}
-        onChange={setAmenities}
-        style={{ width: 600 }}
-        searchable
-        clearable
-        maxDropdownHeight={150}   
+          ]}
+          value={amenities}
+          onChange={setAmenities}
+          style={{ width: 600 }}
+          searchable
+          clearable
+          maxDropdownHeight={150}   
         />
                         
         {errorMsg && <p style={{ color: 'red' }}>{errorMsg}</p>}
