@@ -17,9 +17,9 @@ export async function GetAllListing(){
 }
 
 
-export async function GetListingDetail(id){
+export async function GetListingDetail(listingid){
 
-  const res = await fetch(`${NET_ADDRESS}/listings/${id}`, {
+  const res = await fetch(`${NET_ADDRESS}/listings/${listingid}`, {
     method: 'GET',
     headers: { 'Content-Type': 'application/json' }
   });
@@ -33,9 +33,9 @@ export async function GetListingDetail(id){
 }
 
 // use listing id to get card info 
-export async function GetCardInfo(listingId){
+export async function GetCardInfo(listingid){
 
-  const res = await fetch(`${NET_ADDRESS}/listings/${listingId}`, {
+  const res = await fetch(`${NET_ADDRESS}/listings/${listingid}`, {
     method: 'GET',
     headers: { 'Content-Type': 'application/json' }
   });
@@ -50,7 +50,7 @@ export async function GetCardInfo(listingId){
     : data.reviews.reduce((sum, r) => sum + (r.rating ?? 0), 0) / data.reviews.length();
 
   return {
-    id:listingId,
+    id:listingid,
     title:data.title,
     propertyType:data.metadata.propertyType,
     address:data.address,
@@ -62,5 +62,41 @@ export async function GetCardInfo(listingId){
     rating:ratingRank,
 
   }
+}
 
+// get the user whole current user booking listing detail
+export async function GetListingBookingDetail(token){
+
+  const res=await fetch(`${NET_ADDRESS}/bookings`,{
+    method: 'GET',
+    headers: {
+      'Content-type':'application/json',
+      'Authorization':token
+    }
+  });
+
+  const data=res.json();
+
+  if(!data.ok){
+    throw new Error(data.error);
+  }
+
+  return data;
+}
+
+
+// get unique booking detail,using token and listing id to get
+export async function GetUnqiueListingBookingDetail(listingid,token){
+
+  const data=await GetListingBookingDetail(token);
+
+  data.bookings.array.forEach(element => {
+
+    if (element.id===listingid){
+      return element;
+    }
+    else{
+      return null;
+    }
+  });
 }
