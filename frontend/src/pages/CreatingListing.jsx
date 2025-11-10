@@ -66,11 +66,7 @@ function CreateListing() {
             bedrooms,
             amenities,
             images,  
-<<<<<<< Updated upstream
-          }
-=======
            }
->>>>>>> Stashed changes
         })
       });
 
