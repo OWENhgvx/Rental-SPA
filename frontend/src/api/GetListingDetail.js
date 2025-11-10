@@ -29,12 +29,11 @@ export async function GetListingDetail(listingid){
     throw new Error(data.error);
   }
 
-  return data;
+  return data.listing;
 }
 
 // use listing id to get card info 
-export async function GetCardInfo(listingid){
-
+export async function GetCardInfo(listingid) {
   const res = await fetch(`${NET_ADDRESS}/listings/${listingid}`, {
     method: 'GET',
     headers: { 'Content-Type': 'application/json' }
@@ -45,23 +44,25 @@ export async function GetCardInfo(listingid){
     throw new Error(data.error);
   }
 
-  const ratingRank= data.reviews.length === 0
-    ? 0
-    : data.reviews.reduce((sum, r) => sum + (r.rating ?? 0), 0) / data.reviews.length();
+  const raw = data.listing;
+  const reviews = raw.reviews ?? [];
+  const ratingRank =
+    reviews.length === 0
+      ? 0
+      : reviews.reduce((sum, r) => sum + (r.rating ?? 0), 0) / reviews.length;
 
   return {
-    id:listingid,
-    title:data.title,
-    propertyType:data.metadata.propertyType,
-    address:data.address,
-    thumbnail:data.thumbnail,
-    price:data.price,
-    bedrooms:data.metadata.bedrooms,
-    bathrooms:data.metadata.bathrooms,
-    reviewsNum:data.reviews.length,
-    rating:ratingRank,
-
-  }
+    id: raw.id,
+    title: raw.title,
+    propertyType: raw.metadata.propertyType,
+    address: raw.address,
+    thumbnail: raw.thumbnail,
+    price: raw.price,
+    bedrooms: raw.metadata.bedrooms,
+    bathrooms: raw.metadata.bathrooms,
+    reviewsNum: reviews.length,
+    rating: ratingRank,
+  };
 }
 
 // get the user whole current user booking listing detail
