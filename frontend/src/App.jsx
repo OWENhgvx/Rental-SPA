@@ -5,6 +5,7 @@ import Login from './pages/Login.jsx';
 import Register from './pages/Register.jsx';
 import CreateListing from './pages/CreatingListing.jsx';
 import ListingRequests from './pages/ListingRequests.jsx';
+import HostListings from './pages/HostListings.jsx';
 
 
 function App() {
@@ -23,8 +24,11 @@ function App() {
       {/* create listing page */}
       <Route path='/host/create-listing' element={<CreateListing />} />
 
-      {/* other routes can be added here */}
-      <Route path='host/listings/:listingId/requests' element={<ListingRequests />} />
+      {/* creat listing request page */}
+      <Route path='/host/listings/:listingId/requests' element={<ListingRequests />} />
+
+      {/* host listings page */}
+      <Route path='/host/listings' element={<HostListings />} />
 
     </Routes>
   )

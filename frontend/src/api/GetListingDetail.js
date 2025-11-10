@@ -33,7 +33,11 @@ export async function GetListingDetail(listingid){
 }
 
 // use listing id to get card info 
+<<<<<<< Updated upstream
 export async function GetCardInfo(listingid){
+=======
+export async function GetCardInfo(listingId) {
+>>>>>>> Stashed changes
 
   const res = await fetch(`${NET_ADDRESS}/listings/${listingid}`, {
     method: 'GET',
@@ -41,15 +45,21 @@ export async function GetCardInfo(listingid){
   });
 
   const data = await res.json();
+
   if (!res.ok) {
     throw new Error(data.error);
   }
 
-  const ratingRank= data.reviews.length === 0
-    ? 0
-    : data.reviews.reduce((sum, r) => sum + (r.rating ?? 0), 0) / data.reviews.length();
+  const raw = data.listing;   // ✅ 先取出 listing 对象
+
+  const reviews = raw.reviews ?? [];  // ✅ 确保 reviews 至少是空数组
+  const ratingRank =
+    reviews.length === 0
+      ? 0
+      : reviews.reduce((sum, r) => sum + (r.rating ?? 0), 0) / reviews.length;
 
   return {
+<<<<<<< Updated upstream
     id:listingid,
     title:data.title,
     propertyType:data.metadata.propertyType,
@@ -100,3 +110,18 @@ export async function GetUnqiueListingBookingDetail(listingid,token){
     }
   });
 }
+=======
+    id: raw.id,
+    title: raw.title,
+    propertyType: raw.metadata.propertyType,
+    address: raw.address ?? 'Unknown',
+    thumbnail: raw.thumbnail,
+    price: raw.price,
+    bedrooms: raw.metadata.bedrooms,
+    bathrooms: raw.metadata.bathrooms,
+    reviewsNum: reviews.length,
+    rating: ratingRank,
+  };
+}
+
+>>>>>>> Stashed changes
