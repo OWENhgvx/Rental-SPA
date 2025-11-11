@@ -101,3 +101,40 @@ export async function GetUnqiueListingBookingDetail(listingid,token){
     }
   });
 }
+
+
+
+// send comment to this listing
+export async function SendComment(listingid,bookingid,token,rate,comment){
+
+  const res=await fetch(`${NET_ADDRESS}/listings/${listingid}/reviews/${bookingid}`,{
+
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization':token
+    },
+    body:JSON.stringify({
+      review:{
+        rating: rate,
+        comment: comment,
+        createdAt: new Date().toISOString()
+      } 
+    })
+  });
+
+
+  if (!res.ok) {
+    const data = await res.json().catch(() => ({}));
+    throw new Error(data.error || 'Failed to send review');
+  }
+
+  const data=res.json();
+
+  if(!data.ok){
+    throw new Error(data.error);
+  }
+
+  return data;
+}
+
