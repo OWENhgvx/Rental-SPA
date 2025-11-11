@@ -33,13 +33,13 @@ function HostListings() {
   return (
     <Container fluid px={20}>
       <Title order={2} mb="md">
-        My Listings
+        My Host Listings
       </Title>
 
       {listingDetails.length === 0 ? (
         <Text c="dimmed">You have no listings yet.</Text>
       ) : (
-        <SimpleGrid cols={{ base: 1, sm: 2, md: 3, xl: 5 }}>
+        <SimpleGrid cols={{ base: 2, sm: 2, md: 3, xl: 4 }}>
           {listingDetails.map((item) => (
             <HouseCard
               key={item.id}

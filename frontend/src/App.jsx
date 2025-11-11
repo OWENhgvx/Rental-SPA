@@ -1,6 +1,7 @@
 // import { useState } from 'react';
 import { Routes, Route } from 'react-router-dom';
 // import Dashboard from './pages/Dashboard.jsx';
+import Layout from './Layout';
 import Login from './pages/Login.jsx';
 import Register from './pages/Register.jsx';
 import CreateListing from './pages/CreatingListing.jsx';
@@ -12,8 +13,26 @@ function App() {
   
   return (
     <Routes>
-      {/* dashboard page */}
-      {/* <Route path='/' element={<Dashboard />} /> */}
+      <Route element={<Layout />}>
+        {/* dashboard page */}
+        {/* <Route path='/' element={<Dashboard />} /> */}
+
+
+        {/* register page */}
+        <Route path='/register' element={<Register />} />
+
+        {/* create listing page */}
+        <Route path='/host/create-listing' element={<CreateListing />} />
+
+        {/* edit listing page */}
+        <Route path="/host/listings/edit/:id" element={<CreateListing />} />
+
+        {/* creat listing request page */}
+        <Route path='/host/listings/:listingId/requests' element={<ListingRequests />} />
+        
+        {/* host listings page */}
+        <Route path='/host/listings' element={<HostListings />} />
+      </Route>
 
       {/* login page */}
       <Route path='/login' element={<Login />} />
@@ -21,14 +40,6 @@ function App() {
       {/* register page */}
       <Route path='/register' element={<Register />} />
 
-      {/* create listing page */}
-      <Route path='/host/create-listing' element={<CreateListing />} />
-
-      {/* creat listing request page */}
-      <Route path='/host/listings/:listingId/requests' element={<ListingRequests />} />
-
-      {/* host listings page */}
-      <Route path='/host/listings' element={<HostListings />} />
 
     </Routes>
   )
