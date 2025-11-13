@@ -72,3 +72,20 @@ export async function GetListingBookingDetail(token,useremail,listingid){
   return bookList;
 
 }
+
+// get current success booking detail,user email is user's email,not the house owner
+export async function GetSuccessListingBookingDetail(token,useremail,listingid){
+
+  const data = await GetListingBookingDetail(token,useremail,listingid);
+
+  const successList=[];
+
+  data.forEach((book)=>{
+    if (book.status==='accepted'){
+      successList.push(book);
+    }
+  });
+
+  return successList;
+
+}
