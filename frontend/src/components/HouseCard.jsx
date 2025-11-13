@@ -6,11 +6,15 @@ import {
   Badge,
   Rating,
   ActionIcon,
+  Button,
 } from '@mantine/core';
-import { IconEdit, IconTrash } from '@tabler/icons-react';
 import { useNavigate } from 'react-router-dom';
+import { IconEdit, IconTrash } from '@tabler/icons-react';
 
-function HouseCard({ onEdit, onDelete, pageState, cardInfo }) {
+
+function HouseCard({onEdit,onDelete,pageState,cardInfo}){
+
+  // detailed house info
   const {
     id,
     title,
@@ -22,31 +26,71 @@ function HouseCard({ onEdit, onDelete, pageState, cardInfo }) {
     bathrooms,
     reviewsNum,
     rating,
-  } = cardInfo;
+    published,
+  }=cardInfo;
 
-  const navigate = useNavigate();
+  const navigate=useNavigate();
+
   const safeReviews = reviewsNum ?? 0;
   const safeRating = typeof rating === 'number' ? rating : 0;
 
-  const handleEditClick = (e) => {
+  // we got two  page state
+  // if page state is dashboard, then we are in dashboard page
+  // if page state is other value,we are in other page
+
+  const handleEditClick=(e)=>{
     e.stopPropagation();
     onEdit?.(id);
   };
 
-  const handleDeleteClick = (e) => {
+  const handleDeleteClick=(e)=>{
     e.stopPropagation();
     onDelete?.(id);
   };
 
-  const navigateDetail = (id) => {
-    navigate(`/house/id=${id}`);
+  // navigate to house detail
+  const navigateDetail=(id)=>{
+    navigate(`/listings/${id}`)
   };
 
-  return (
+  
+  const handleTogglePublish = async (e) => {
+    e.stopPropagation();
+    const token = localStorage.getItem('token');
+
+    if (published){
+
+      try {
+        const res = await fetch( `http://localhost:5005/listings/unpublish/${id}`, {
+          method: 'PUT',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          body: null ,
+        });
+
+        if (!res.ok) {
+          const err = await res.json();
+          throw new Error(err.error || 'Failed to toggle publish state');
+        }
+
+        alert(published ? 'Listing unpublished successfully' : 'Listing published successfully');
+        window.location.reload();
+      } catch (error) {
+        alert(error.message);
+      }
+    }else
+      navigate(`/host/listings/${id}/availability`)
+
+
+  };
+
+  return(
     <Card
-      onClick={() => navigateDetail(id)}
-      shadow="sm"
-      radius="lg"
+      onClick={()=>navigateDetail(id)}
+      shadow='sm'
+      radius='lg'
       withBorder
       style={{
         transition: 'transform 0.2s ease, box-shadow 0.2s ease',
@@ -58,6 +102,7 @@ function HouseCard({ onEdit, onDelete, pageState, cardInfo }) {
         },
       }}
     >
+
       <Card.Section pos="relative">
         <Image
           src={thumbnail}
@@ -66,20 +111,6 @@ function HouseCard({ onEdit, onDelete, pageState, cardInfo }) {
 
           fit="cover"
           style={{ objectFit: 'cover', borderTopLeftRadius: '8px', borderTopRightRadius: '8px' }}
-        />
-
-        {/* photo overlay gradient */}
-        <div
-          style={{
-            position: 'absolute',
-            bottom: 0,
-            left: 0,
-            right: 0,
-            height: '30%',
-            background: 'linear-gradient(transparent, rgba(0, 0, 0, 0.35))',
-            borderBottomLeftRadius: '8px',
-            borderBottomRightRadius: '8px',
-          }}
         />
 
         {/* oberlay action icons for host page */}
@@ -113,35 +144,55 @@ function HouseCard({ onEdit, onDelete, pageState, cardInfo }) {
         )}
       </Card.Section>
 
-      <Text fw={600} fz="lg" mt="sm">
-        {title}
-      </Text>
+      <Group justify="space-between" mt="sm">
+        <Text fw={600}>{title}</Text>
+        <Badge variant="light">{propertyType}</Badge>
+      </Group>
 
-      <Text c="dimmed" size="sm" mt={2}>
+      <Text c="dimmed" size="sm">
         {address}
       </Text>
 
-      <Group mt="xs" gap="xs">
-        <Badge variant="outline" color="gray">
-          {propertyType}
-        </Badge>
-        <Badge color="blue">{bedrooms} BEDROOM</Badge>
-        <Badge color="teal">{bathrooms} BATHROOM</Badge>
+      <Group gap="xs" mt="xs">
+        <Badge>{bedrooms} BEDROOM</Badge>
+        <Badge>{bathrooms} BATHROOM</Badge>
+        <Badge color="violet">${price}/night</Badge>
       </Group>
 
-      <Group mt="sm" justify="space-between">
-        <Badge color="violet" size="lg">
-          ${price}/night
-        </Badge>
+      <Group mt="sm" justify="center">
         <Group gap={4}>
           <Rating value={safeRating} fractions={2} readOnly size="sm" />
           <Text size="sm" c="dimmed">
-            {safeRating.toFixed(2)} · {safeReviews} reviews
+            {safeRating.toFixed(2)}·{safeReviews} reviews
           </Text>
         </Group>
       </Group>
+
+      {pageState === 'host' && (
+        <Group mt="md" justify="center" gap="md">
+          <Button
+            color={published ? 'red' : 'green'}
+            onClick={handleTogglePublish}
+          >
+            {published ? 'Unpublish' : 'Publish'}
+          </Button>
+
+          {published === true && (
+            <Button
+              variant="outline"
+              color="blue"
+              onClick={(e) => {
+                e.stopPropagation();
+                navigate(`/host/listings/${id}/availability`);
+              }}
+            >
+              Edit Dates
+            </Button>)}
+        </Group>
+      )}
     </Card>
   );
+
 }
 
 export default HouseCard;
