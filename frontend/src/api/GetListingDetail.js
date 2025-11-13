@@ -25,6 +25,7 @@ export async function GetListingDetail(listingid){
   });
 
   const data = await res.json();
+
   if (!res.ok) {
     throw new Error(data.error);
   }
@@ -44,25 +45,26 @@ export async function GetCardInfo(listingid) {
     throw new Error(data.error);
   }
 
-  const raw = data.listing;
-  const reviews = raw.reviews ?? [];
-  const ratingRank =
-    reviews.length === 0
-      ? 0
-      : reviews.reduce((sum, r) => sum + (r.rating ?? 0), 0) / reviews.length;
+  const listingData=data.listing;
+
+  const ratingRank= listingData.reviews.length === 0
+    ? 0
+    : listingData.reviews.reduce((sum, r) => sum + (r.rating ?? 0), 0) / listingData.reviews.length;
 
   return {
-    id: raw.id,
-    title: raw.title,
-    propertyType: raw.metadata.propertyType,
-    address: raw.address,
-    thumbnail: raw.thumbnail,
-    price: raw.price,
-    bedrooms: raw.metadata.bedrooms,
-    bathrooms: raw.metadata.bathrooms,
-    reviewsNum: reviews.length,
-    rating: ratingRank,
-  };
+    id:listingid,
+    title:listingData.title,
+    propertyType:listingData.metadata.propertyType,
+    address:listingData.address,
+    thumbnail:listingData.thumbnail,
+    price:listingData.price,
+    bedrooms:listingData.metadata.bedrooms,
+    bathrooms:listingData.metadata.bathrooms,
+    reviewsNum:listingData.reviews.length,
+    rating:ratingRank,
+    published: listingData.published,
+    availability: listingData.availability
+  }
 }
 
 // get the user whole current user booking listing detail
@@ -103,7 +105,6 @@ export async function GetUnqiueListingBookingDetail(listingid,token){
 }
 
 
-
 // send comment to this listing
 export async function SendComment(listingid,bookingid,token,rate,comment){
 
@@ -137,4 +138,3 @@ export async function SendComment(listingid,bookingid,token,rate,comment){
 
   return data;
 }
-
