@@ -169,7 +169,7 @@ function CreatingListing() {
           maxDropdownHeight={150}
         />
 
-        {errorMsg && <p style={{ color: 'red' }}>{errorMsg}</p>}
+        {errorMsg && <p style={{ color: 'red' }}>{errorMsg}</p >}
 
         <Button onClick={handleSubmit} style={{ width: 600 }}>
           {isEditMode ? 'Save Changes' : 'Create Listing'}
