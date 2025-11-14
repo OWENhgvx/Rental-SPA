@@ -45,7 +45,7 @@ function RateFilter({onCommit,resetRate}){
     <Button 
       radius='xl'
       color='blue'
-      variant={isClick?'filled':'subtle'}
+      variant={isClick?'filled':'light'}
       onClick={handleClick}
       rightSection={<IconRight size={12}/>}
     >
