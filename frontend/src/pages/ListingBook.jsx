@@ -1,6 +1,6 @@
 // src/pages/ListingBook.jsx
 import { useEffect, useState } from 'react';
-import { Stack, Flex, Box, Group, Text, Badge, Rating } from '@mantine/core';
+import { Stack, Flex, Box, Group, Text, Badge, Rating, Title, Container } from '@mantine/core';
 import { GetListingDetail } from '../api/GetListingDetail.js';
 import { useParams, useLocation } from 'react-router-dom';
 import ListingImageDisplay from '../components/ListingImageDisplay.jsx';
@@ -61,66 +61,68 @@ export default function ListingBook() {
   const totalPrice = hasRange ? nights * pricePerNight : pricePerNight;
 
   return (
-    <Stack>
-      <Text size="xl" fw={700}>{listingDetail.title}</Text>
+    <Container size='1500'>
+      <Stack>
+        <Title size={40} fw={700}>{listingDetail.title}</Title>
 
-      <Flex direction={{ base: 'column', md: 'row' }} align="flex-start" gap="md">
-        <Box style={{ flex: 2 }}>
-          <ListingImageDisplay images={listingImages} />
-        </Box>
+        <Flex direction={{ base: 'column', sm: 'row' }} align="flex-start" gap="md">
+          <Box style={{ flex: 1 }}>
+            <ListingImageDisplay images={listingImages} />
+          </Box>
 
-        <Box style={{ flex: 1 }}>
-          <Stack gap="sm">
-            {listingDetail.address && (
-              <Text size="lg" c="dimmed">
-                {listingDetail.metadata?.propertyType} in {listingDetail.address}
-              </Text>
-            )}
-
-            <Text size="sm">
-              {listingDetail.metadata?.bedrooms} bedroom |{' '}
-              {listingDetail.metadata?.beds} bed |{' '}
-              {listingDetail.metadata?.bathrooms} bathroom
-            </Text>
-
-            <Text size="sm">
-              Amenities:{' '}
-              {(listingDetail.metadata?.amenities || []).join(', ')}
-            </Text>
-
-            {!hasRange ? (
-              <Text>Price Per Night: ${pricePerNight}</Text>
-            ) : (
-              <Text>
-                Total Price: ${totalPrice} ({nights} night{nights > 1 ? 's' : ''} · ${pricePerNight}/night)
-              </Text>
-            )}
-
-            <RatingBox reviews={listingDetail.reviews} />
-
-            {typeof listingDetail.avgRating === 'number' && (
-              <Group gap="xs" align="center">
-                <Rating value={listingDetail.avgRating} readOnly fractions={2} size="sm" />
-                <Badge variant="light">
-                  {listingDetail.avgRating?.toFixed(2)}
-                </Badge>
-                <Text size="sm" c="dimmed">
-                  {Array.isArray(listingDetail.reviews) ? listingDetail.reviews.length : 0} reviews
+          <Box style={{ flex: 1 }}>
+            <Stack gap="sm">
+              {listingDetail.address && (
+                <Text size="lg" c="dimmed">
+                  {listingDetail.metadata?.propertyType} in {listingDetail.address}
                 </Text>
-              </Group>
-            )}
-          </Stack>
-        </Box>
-      </Flex>
+              )}
 
-      <Stack gap="md">
-        <BookListingBox
-          daterange={hasRange ? dateRange : [null, null]}
-          price={pricePerNight}
-          listingId={listingId}
-        />
-        <CommentBar listingId={listingId} />
+              <Text size="sm">
+                {listingDetail.metadata?.bedrooms} bedroom |{' '}
+                {listingDetail.metadata?.beds} bed |{' '}
+                {listingDetail.metadata?.bathrooms} bathroom
+              </Text>
+
+              <Text size="sm">
+                Amenities:{' '}
+                {(listingDetail.metadata?.amenities || []).join(', ')}
+              </Text>
+
+              {!hasRange ? (
+                <Text>Price Per Night: ${pricePerNight}</Text>
+              ) : (
+                <Text>
+                  Total Price: ${totalPrice} ({nights} night{nights > 1 ? 's' : ''} · ${pricePerNight}/night)
+                </Text>
+              )}
+
+              <RatingBox reviews={listingDetail.reviews} />
+
+              {typeof listingDetail.avgRating === 'number' && (
+                <Group gap="xs" align="center">
+                  <Rating value={listingDetail.avgRating} readOnly fractions={2} size="sm" />
+                  <Badge variant="light">
+                    {listingDetail.avgRating?.toFixed(2)}
+                  </Badge>
+                  <Text size="sm" c="dimmed">
+                    {Array.isArray(listingDetail.reviews) ? listingDetail.reviews.length : 0} reviews
+                  </Text>
+                </Group>
+              )}
+            </Stack>
+          </Box>
+        </Flex>
+
+        <Stack gap="md">
+          <BookListingBox
+            daterange={hasRange ? dateRange : [null, null]}
+            price={pricePerNight}
+            listingId={listingId}
+          />
+          <CommentBar listingId={listingId} />
+        </Stack>
       </Stack>
-    </Stack>
+    </Container>
   );
 }

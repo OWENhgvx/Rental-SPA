@@ -24,7 +24,7 @@ export default function ListingImageDisplay({ images }) {
       pos='relative'
       radius='md'
       style={{
-        height:360,
+        height:600,
         width:'100%'
       }}
     >
