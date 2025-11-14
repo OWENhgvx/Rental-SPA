@@ -22,10 +22,18 @@ export default function ListingImageDisplay({ images }) {
   return (
     <Box
       pos='relative'
+      radius='md'
+      style={{
+        height:360,
+        width:'100%'
+      }}
     >
       <Image
         src={images[index]}
         radius='md'
+        fit="cover"            // ← 铺满容器
+        w="100%"
+        h="100%"
       />
 
       <ActionIcon

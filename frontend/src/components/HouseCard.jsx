@@ -40,6 +40,7 @@ function HouseCard({onEdit,onDelete,pageState,cardInfo}){
 
   const handleEditClick=(e)=>{
     e.stopPropagation();
+    navigateEdit(id);
     onEdit?.(id);
   };
 
@@ -53,6 +54,10 @@ function HouseCard({onEdit,onDelete,pageState,cardInfo}){
     navigate(`/listings/${id}`)
   };
 
+  // navigate to house edit page
+  const navigateEdit=(id)=>{
+    navigate(`/host/listings/edit/${id}`)
+  };
   
   const handleTogglePublish = async (e) => {
     e.stopPropagation();
