@@ -3,18 +3,18 @@ import { useState, useEffect } from 'react';
 import { Popover, Fieldset, Button} from '@mantine/core';
 import { DatePicker } from '@mantine/dates';
 
-export default function DateFilter({ onCommit, resetDate }) {
+export default function DateFilter({onCommit,resetDate}) {
 
   const [opened, setOpened] = useState(false);
   const [date, setDate] = useState([null,null]);
   
   //set if got value
-  const picked = date[0] !== null || date[1] !== null;
+  const picked = date[0]!==null || date[1] !== null;
 
   const dateText=date[0]===null?'Choose date':date[1]===null?`At ${date[0]}`:`From ${date[0]} To ${date[1]}`;
   const labelText=picked?dateText:"Choose date";
 
-  useEffect(() => {
+  useEffect(()=> {
     setDate([null,null]);
     onCommit?.(null);
   }, [resetDate]);
@@ -38,7 +38,10 @@ export default function DateFilter({ onCommit, resetDate }) {
           <DatePicker allowDeselect
             value={date}
             type="range"
-            onChange={setDate}
+            onChange={(value)=>{
+              setDate(value);
+              onCommit?.(value);
+            }}
           />
         </Fieldset>
       </Popover.Dropdown>
