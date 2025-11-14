@@ -8,17 +8,17 @@ import RateFilter  from './RateFilter';
 
 export default function Searchbar({ onSearch }) {
 
-  const [query, setQuery] = useState('');
-  const [beds, setBeds]       = useState(null);           // [min, max] | null
-  const [dates, setDates]     = useState(null);           // [startDate, endDate] | null
-  const [price, setPrice]     = useState(null);           // [min, max] | null
-  const [rating, setRating]   = useState('none');
-  // 用一个令牌通知子组件清空（+1 就会触发它们的 useEffect）
-  const [resetToken, setResetToken] = useState(0);
+  const [query,setQuery] =useState('');
+  const [beds,setBeds]=useState(null);           // [min, max] | null
+  const [dates,setDates]=useState(null);           // [startDate, endDate] | null
+  const [price,setPrice]=useState(null);           // [min, max] | null
+  const [rating,setRating]=useState('none');
 
-  const doSearch = () => {
+  const [resetToken, setResetToken] =useState(0);
+
+  const doSearch =() => {
     onSearch?.({
-      q: query.trim(),
+      q:query.trim(),
       beds,
       dates,
       price,
@@ -26,17 +26,16 @@ export default function Searchbar({ onSearch }) {
     });
   };
 
-  const resetAll = () => {
+  const resetAll =() => {
     setBeds(null);
     setDates(null);
     setPrice(null);
     setRating('none');
-    setResetToken(t => t + 1);   // 通知所有子筛选器复位
+    setResetToken(t => t + 1);
   };
 
   return (
     <Stack gap="xs">
-      {/* 顶部：输入框 + Search + Reset */}
       <Group wrap="nowrap" gap="sm" align="flex-start">
         <TextInput
           value={query}
@@ -44,14 +43,13 @@ export default function Searchbar({ onSearch }) {
           radius="xl"
           size="md"
           placeholder="Search title or city..."
-          onKeyDown={(e) => e.key === 'Enter' && doSearch()}
+          onKeyDown={(e) => e.key ==='Enter' && doSearch()}
           style={{ flex: 1 }}
         />
         <Button variant="filled" onClick={doSearch}>Search</Button>
         <Button variant="light" color='red' onClick={resetAll}>Reset</Button>
       </Group>
 
-      {/* 下方：四个筛选器 */}
       <Fieldset legend="Filters" radius="md">
         <Group gap="sm" wrap="wrap">
           <BedFilter
