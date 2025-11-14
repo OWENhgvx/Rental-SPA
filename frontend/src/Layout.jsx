@@ -21,7 +21,7 @@ export default function Layout() {
         <Group h="100%" px="md" justify="space-between">
           <Group gap="md" align="center" wrap="nowrap">
             <Burger opened={opened} onClick={toggle} hiddenFrom="sm" size="sm" />
-            <Image src={logo} h={40} fit="contain" style={{ cursor: 'pointer' }} onClick={() => navigate('/dashboard')} />
+            <Image src={logo} h={40} fit="contain" style={{ cursor: 'pointer' }} onClick={() => navigate('/')} />
           </Group>
 
           <Group gap="lg" visibleFrom="sm" align="center">
