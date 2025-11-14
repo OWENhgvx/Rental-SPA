@@ -4,7 +4,7 @@ const NET_ADDRESS="http://localhost:5005";
 // send new booking
 export async function SendNewBooking(token,listingid,daterange,totalPrice){
 
-  const res = await fetch(`${NET_ADDRESS}/new/${listingid}`,{
+  const res = await fetch(`${NET_ADDRESS}/bookings/new/${listingid}`,{
     method: 'POST',
     headers: {
       'Content-type':'application/json',

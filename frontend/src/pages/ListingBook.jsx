@@ -124,7 +124,7 @@ export default function ListingBook() {
               <BookListingBox
                 daterange={hasRange ? dateRange : [null, null]}
                 price={pricePerNight}
-                listingId={listingId}
+                listingid={listingId}
               />
             </Stack>
           </Box>
