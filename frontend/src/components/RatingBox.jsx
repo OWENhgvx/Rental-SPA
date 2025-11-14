@@ -52,7 +52,6 @@ export default function RatingBox({ reviews = [] }) {
     [reviews, selectedStar],
   );
 
-  // Tooltip 里显示的内容（星级分布）
   const tooltipContent = (
     <Stack gap={4}>
       <Text size="xs" fw={500}>
@@ -97,7 +96,7 @@ export default function RatingBox({ reviews = [] }) {
         withBorder
         radius="md"
         padding="xs"
-        style={{ display: 'inline-block' }}
+        style={{ display: 'center' }}
       >
         <Tooltip
           label={tooltipContent}

@@ -64,37 +64,47 @@ export default function ListingBook() {
     <Container size='1500'>
       <Stack>
         <Title size={40} fw={700}>{listingDetail.title}</Title>
-
         <Flex direction={{ base: 'column', sm: 'row' }} align="flex-start" gap="md">
-          <Box style={{ flex: 1 }}>
+          <Box miw={500} style={{ flex: 1 }}>
             <ListingImageDisplay images={listingImages} />
           </Box>
 
-          <Box style={{ flex: 1 }}>
+          <Box size='lg' style={{ flex: 1 }}>
             <Stack gap="sm">
               {listingDetail.address && (
-                <Text size="lg" c="dimmed">
+                <Text size="xl" c="black">
                   {listingDetail.metadata?.propertyType} in {listingDetail.address}
                 </Text>
               )}
 
-              <Text size="sm">
-                {listingDetail.metadata?.bedrooms} bedroom |{' '}
-                {listingDetail.metadata?.beds} bed |{' '}
-                {listingDetail.metadata?.bathrooms} bathroom
+              <Text size="md" c='dimmed'>
+                {listingDetail.metadata?.bedrooms} bedroom🛏️ |{' '}
+                {listingDetail.metadata?.beds} {Number(listingDetail.metadata?.beds)===1?'bed😴':'beds😴'} |{' '}
+                {listingDetail.metadata?.bathrooms} bathroom🛁
               </Text>
 
-              <Text size="sm">
+              <Title size="md">
                 Amenities:{' '}
-                {(listingDetail.metadata?.amenities || []).join(', ')}
-              </Text>
+                <Group mt="xs">
+                  {(listingDetail.metadata?.amenities || []).map((amenity, index) => (
+                    <Badge size='lg' key={index} variant="light">
+                      {amenity}
+                    </Badge>
+                  ))}
+                </Group>
 
+              </Title>
               {!hasRange ? (
-                <Text>Price Per Night: ${pricePerNight}</Text>
+                <>
+                  <Title size='md'>Price Per Night:</Title>
+                  <Text> ${pricePerNight}</Text>
+                </>
               ) : (
-                <Text>
-                  Total Price: ${totalPrice} ({nights} night{nights > 1 ? 's' : ''} · ${pricePerNight}/night)
-                </Text>
+                <>
+                  <Text>
+                    Total Price: ${totalPrice} ({nights} night{nights > 1 ? 's' : ''} · ${pricePerNight}/night)
+                  </Text>
+                </>
               )}
 
               <RatingBox reviews={listingDetail.reviews} />
@@ -110,18 +120,16 @@ export default function ListingBook() {
                   </Text>
                 </Group>
               )}
+
+              <BookListingBox
+                daterange={hasRange ? dateRange : [null, null]}
+                price={pricePerNight}
+                listingId={listingId}
+              />
             </Stack>
           </Box>
         </Flex>
-
-        <Stack gap="md">
-          <BookListingBox
-            daterange={hasRange ? dateRange : [null, null]}
-            price={pricePerNight}
-            listingId={listingId}
-          />
-          <CommentBar listingId={listingId} />
-        </Stack>
+        <CommentBar listingId={listingId} />
       </Stack>
     </Container>
   );

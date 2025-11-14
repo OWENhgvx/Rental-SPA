@@ -8,6 +8,7 @@ import {
   Flex,
   Popover,
   Fieldset,
+  Title,
 } from '@mantine/core';
 import { DatePicker } from '@mantine/dates';
 import { SendNewBooking } from '../api/BookingApi.js';
@@ -54,8 +55,10 @@ export default function BookListingBox({ daterange = [null, null], price, listin
 
   return (
     <Card shadow="sm" padding="md" radius="md" withBorder>
+      <Title ta='center' size='xl'>Start your trip🚀</Title>
       {hasRange ? (
         <>
+
           <Text>${totalPrice} AUD</Text>
           <Text size="sm" c="dimmed">
             for {nights} night{nights > 1 ? 's' : ''} · ${price}/night
@@ -129,11 +132,11 @@ export default function BookListingBox({ daterange = [null, null], price, listin
       <Divider my="md" />
 
       <Flex gap="xs">
-        <Button c="blue" variant="filled" onClick={onSubmit} fullWidth>
+        <Button  variant="filled" onClick={onSubmit} fullWidth>
           Submit
         </Button>
 
-        <Button c="red" variant="subtle" onClick={onReset} fullWidth>
+        <Button color="red" variant="light" onClick={onReset} fullWidth>
           Reset
         </Button>
       </Flex>
