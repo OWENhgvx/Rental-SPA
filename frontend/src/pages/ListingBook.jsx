@@ -43,8 +43,14 @@ export default function ListingBook() {
   if (!listingDetail) return <Text c="red">Not found</Text>;
 
   const thumbnail = listingDetail.thumbnail;
-  const rawImages = listingDetail.metadata?.image || [];
-  const listingImages = [thumbnail, ...rawImages].filter(Boolean);
+  const rawImages = listingDetail.metadata?.images || [];
+  const listingImages=[];
+  if (thumbnail) listingImages.push(thumbnail);
+  rawImages.forEach(image => {
+    if(image){
+      listingImages.push(image);
+    }
+  });
 
   const hasRange = Array.isArray(dateRange) && dateRange[0] && dateRange[1];
   const nights = hasRange

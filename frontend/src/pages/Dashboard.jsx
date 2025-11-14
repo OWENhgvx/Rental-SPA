@@ -1,11 +1,6 @@
 // src/pages/Dashboard.jsx
 import { useEffect, useMemo, useState } from 'react';
-import {
-  Container,
-  Stack,
-  SimpleGrid,
-  Text,
-} from '@mantine/core';
+import {Container,Stack,SimpleGrid,Text} from '@mantine/core';
 
 import Searchbar from '../components/Searchbar';
 import HouseCard from '../components/HouseCard';
@@ -28,11 +23,11 @@ function between(x, min, max) {
 }
 
 export default function Dashboard() {
-  const [allCards, setAllCards] = useState([]);
-  const [loading, setLoading]   = useState(false);
-  const [error, setError]       = useState(null);
+  const [allCards, setAllCards]=useState([]);
+  const [loading, setLoading]=useState(false);
+  const [error, setError]=useState(null);
 
-  const [filters, setFilters] = useState({
+  const [filters, setFilters]=useState({
     q: '',
     beds: null,  
     dates: null,

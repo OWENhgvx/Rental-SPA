@@ -5,22 +5,22 @@ import { Popover, Fieldset, Button, RangeSlider } from '@mantine/core';
 export default function PriceFilter({
   onCommit,
   resetPrice,
-  min = 0,
-  max = 2000,
-  step = 50,
+  min=0,
+  max=2000,
+  step=50,
 }) {
-  const [opened, setOpened] = useState(false);
-  const [active, setActive] = useState(false);
-  const [range, setRange]   = useState([null, null]);
-  useEffect(() => {
+  const [opened, setOpened]=useState(false);
+  const [active, setActive]=useState(false);
+  const [range, setRange]=useState([null, null]);
+  useEffect(()=>{
     setOpened(false);
     setActive(false);
     setRange([null, null]);
     onCommit?.(null);
-  }, [resetPrice, onCommit]);
+  }, [resetPrice,onCommit]);
 
-  const nf = new Intl.NumberFormat('en-AU', { maximumFractionDigits: 0 });
-  const toText = (v) => (v >= max ? `${nf.format(max)}+` : nf.format(v));
+  const nf=new Intl.NumberFormat('en-AU', { maximumFractionDigits: 0 });
+  const toText=(v)=> (v >= max ? `${nf.format(max)}+` : nf.format(v));
 
   const label = !active
     ? 'Choose price'
@@ -58,12 +58,12 @@ export default function PriceFilter({
             step={step}
             value={sliderValue}
             onChange={setRange}
-            minRange={0}                         // 允许重合
-            label={(v) => `$${toText(v)}`}       // 到达上限显示 "max+"
+            minRange={0}
+            label={(v) => `$${toText(v)}`}
             onChangeEnd={(final) => {
               setRange(final);
               setActive(true);
-              onCommit?.(final);                 // 父组件里把 high===max 解释为 ">= max"
+              onCommit?.(final);
             }}
           />
         </Fieldset>
