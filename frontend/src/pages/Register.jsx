@@ -106,7 +106,7 @@ function Register() {
 
             {errorMsg && <Text color="red">{errorMsg}</Text>}
 
-            <Button type="submit" fullWidth>
+            <Button type="submit" fullWidth onClick={()=> navigate('/')}>
               Register
             </Button>
           </Stack>

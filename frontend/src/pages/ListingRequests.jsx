@@ -1,8 +1,9 @@
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
-import {Card,Title,Text,Button,Divider,Stack,Group,Loader,Alert,} from "@mantine/core";
+import {Card,Title,Text,Button,Divider,Stack,Group,Loader,Alert,Table} from "@mantine/core";
 
 function ListingRequests() {
+  const navigate = useNavigate();
   const { listingId } = useParams();
   const [listing, setListing] = useState(null);
   const [pendingRequests, setPendingRequests] = useState([]);
@@ -80,7 +81,7 @@ function ListingRequests() {
         : [];
 
       const related = allBookings.filter(
-        (b) => b.listingId === Number(listingId)
+        (b) => String(b.listingId) === String(listingId)
       );
 
       setPendingRequests(related.filter((b) => b.status === "pending"));
