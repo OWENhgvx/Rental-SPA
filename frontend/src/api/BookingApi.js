@@ -1,8 +1,26 @@
 const NET_ADDRESS="http://localhost:5005";
 
 
+
+const toYMD = (d) => {
+  if (!(d instanceof Date) || !Number.isFinite(d.getTime())) return null;
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${y}-${m}-${day}`;
+};
+
 // send new booking
 export async function SendNewBooking(token,listingid,daterange,totalPrice){
+
+  const [start,end]=daterange;
+  const payload={
+    dateRange:{
+      start: toYMD(start),
+      end:   toYMD(end),   
+    },
+    totalPrice: Number(totalPrice) || 0,
+  }
 
   const res = await fetch(`${NET_ADDRESS}/bookings/new/${listingid}`,{
     method: 'POST',
@@ -10,10 +28,7 @@ export async function SendNewBooking(token,listingid,daterange,totalPrice){
       'Content-type':'application/json',
       'Authorization':token
     },
-    body:JSON.stringify({
-      'dateRange':daterange,
-      'totalPrice':totalPrice
-    })
+    body: JSON.stringify(payload),
   });
 
   const data = await res.json();
