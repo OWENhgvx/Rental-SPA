@@ -61,7 +61,7 @@ function HouseCard({onDelete,pageState,cardInfo}){
 
   // navigate to house edit page
   const navigateEdit=(id)=>{
-    navigate(`host/listings/edit/${id}`)
+    navigate(`/host/listings/edit/${id}`)
   };
   
   const handleTogglePublish = async (e) => {
