@@ -110,6 +110,7 @@ function AvailabilityPage() {
           label="Select date range"
           value={range}
           onChange={setRange}
+          minDate={new Date()} 
         />
         <Button color="blue" onClick={addRange}>
           Add
