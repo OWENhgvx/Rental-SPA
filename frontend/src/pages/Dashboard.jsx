@@ -44,14 +44,20 @@ export default function Dashboard() {
         setError(null);
 
         const list = await GetAllListing(); 
-        const ids = (list || []).map((it) => it.id ?? it.listingId ?? it);
+        const ids = (list || []).map((it) => it.id);
         // console.log('all ids:', ids);
 
         const settled = await Promise.allSettled(
           ids.map((id) => GetCardInfo(id))
         );
 
-        const cards = settled
+        const availableCards = settled
+          .filter((result) => result.status === 'fulfilled' && result.value.published)
+          .map((result) => result);
+
+        console.log(availableCards);
+
+        const cards = availableCards
           .map((res, i) => {
             if (res.status === 'fulfilled') return res.value;
             console.error('GetCardInfo error for id', ids[i], res.reason);
@@ -80,8 +86,6 @@ export default function Dashboard() {
     let list = allCards.filter((c) => {
       if (!matchesQuery(c, filters.q)) return false;
 
-      if (c.availability) return false;
-      
       if (filters.beds && Array.isArray(filters.beds)) {
         const [mn, mx] = filters.beds;
         if (!between(c.bedrooms, mn, mx)) return false;
