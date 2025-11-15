@@ -20,6 +20,7 @@ export default function ListingBook() {
   const [loading, setLoading] = useState(true);
   const [err, setErr] = useState(null);
 
+
   useEffect(() => {
     let cancelled = false;
     (async () => {
@@ -27,7 +28,7 @@ export default function ListingBook() {
         setLoading(true);
         setErr(null);
         const raw = await GetListingDetail(listingId);
-        const l = raw?.listing ?? raw ?? {};
+        const l = raw ?? null;
         if (!cancelled) setListingDetail(l);
       } catch (e) {
         if (!cancelled) setErr(e.message || 'Failed to load listing');
@@ -59,6 +60,7 @@ export default function ListingBook() {
 
   const pricePerNight = Number(listingDetail.price ?? 0);
   const totalPrice = hasRange ? nights * pricePerNight : pricePerNight;
+  const avaList = listingDetail.availability;
 
   return (
     <Container size='1500'>
@@ -125,6 +127,7 @@ export default function ListingBook() {
                 daterange={hasRange ? dateRange : [null, null]}
                 price={pricePerNight}
                 listingid={listingId}
+                excludedate={avaList}
               />
             </Stack>
           </Box>
