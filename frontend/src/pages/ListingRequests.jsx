@@ -168,14 +168,21 @@ function ListingRequests() {
       {pendingRequests.length === 0 ? (
         <Text color="dimmed">No pending requests.</Text>
       ) : (
-        <Table striped highlightOnHover>
+        <Table striped highlightOnHover   style={{ textAlign: "center" }}>
+          <colgroup>
+            <col span="1" style={{ width: "25%" }} />
+            <col span="1" style={{ width: "25%" }} />
+            <col span="1" style={{ width: "20%" }} />
+            <col span="1" style={{ width: "15%" }} />
+            <col span="1" style={{ width: "15%" }} />
+          </colgroup>
           <thead>
             <tr>
               <th>Customer</th>
               <th>Date Range</th>
               <th>Total Price</th>
               <th>Status</th>
-              <th style={{ textAlign: "right" }}>Actions</th>
+              <th>Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -220,7 +227,7 @@ function ListingRequests() {
       {history.length === 0 ? (
         <Text color="dimmed">No booking history.</Text>
       ) : (
-        <Table striped>
+        <Table striped style={{ textAlign: "center" }}>
           <thead>
             <tr>
               <th>Customer</th>
