@@ -12,7 +12,7 @@ import { useNavigate } from 'react-router-dom';
 import { IconEdit, IconTrash } from '@tabler/icons-react';
 
 
-function HouseCard({onEdit,onDelete,pageState,cardInfo}){
+function HouseCard({onDelete,pageState,cardInfo}){
 
   // detailed house info
   const {
@@ -41,7 +41,7 @@ function HouseCard({onEdit,onDelete,pageState,cardInfo}){
   const handleEditClick=(e)=>{
     e.stopPropagation();
     navigateEdit(id);
-    onEdit?.(id);
+    // onEdit?.(id);
   };
 
   const handleDeleteClick=(e)=>{
@@ -50,13 +50,18 @@ function HouseCard({onEdit,onDelete,pageState,cardInfo}){
   };
 
   // navigate to house detail
+  
   const navigateDetail=(id)=>{
-    navigate(`/listings/${id}`)
+    if (pageState == 'guest'){
+      navigate(`/listings/${id}`)
+      return;
+    } 
+    navigate(`/host/listings/${id}/requests`)
   };
 
   // navigate to house edit page
   const navigateEdit=(id)=>{
-    navigate(`/host/listings/edit/${id}`)
+    navigate(`host/listings/edit/${id}`)
   };
   
   const handleTogglePublish = async (e) => {
