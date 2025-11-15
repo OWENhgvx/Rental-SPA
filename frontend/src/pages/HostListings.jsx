@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { SimpleGrid, Container, Title, Button, Badge,Text, Group } from '@mantine/core';
+import { SimpleGrid, Container, Title, Button, Badge, Text, Group } from '@mantine/core';
 import { useNavigate } from 'react-router-dom';
 import HouseCard from '../components/HouseCard';
 import ProfitChart from "../components/ProfitChart";
@@ -9,21 +9,25 @@ function HostListings() {
   const navigate = useNavigate();
   const userEmail = localStorage.getItem('email');
 
+  const [myIds, setMyIds] = useState([]);
   const [listingDetails, setListingDetails] = useState([]);
   const [houseNumber, setHouseNumber] = useState(0);
 
-  // fetch data for chart
-  const [bookings, setBookings] = useState({});
+  const [bookings, setBookings] = useState([]);
+  const [myBookings, setMyBookings] = useState([]);  // 仅图表使用
 
+  // 1) 拉取我的 listing（owner === 当前用户）
   async function fetchMyListings() {
     try {
       const allListings = await GetAllListing();
 
-      const myIds = allListings
+      const ids = allListings
         .filter((l) => l.owner === userEmail)
-        .map((l) => l.id);
+        .map((l) => String(l.id));
 
-      const cardInfos = await Promise.all(myIds.map((id) => GetCardInfo(id)));
+      setMyIds(ids);
+
+      const cardInfos = await Promise.all(ids.map((id) => GetCardInfo(id)));
 
       setHouseNumber(cardInfos.length);
       setListingDetails(cardInfos);
@@ -32,6 +36,7 @@ function HostListings() {
     }
   }
 
+  // 2) 拉取所有 bookings（暂不筛选）
   async function fetchBookings() {
     try {
       const token = localStorage.getItem("token");
@@ -41,52 +46,64 @@ function HostListings() {
       });
 
       const data = await res.json();
-      setBookings(data.bookings || {});
+      const allBookings = data.bookings ? Object.values(data.bookings) : [];
+
+      setBookings(allBookings);
     } catch (err) {
       console.error("Failed to load bookings:", err);
     }
   }
 
+  // 3) 根据 myIds 从 bookings 中筛选属于我的
   useEffect(() => {
-    fetchMyListings();
-    fetchBookings();  // add 
-  }, [userEmail]);
-
-
-  const handleDelete = async (id) =>{
-    const ok =confirm('Are you sure?');
-    if (!ok){
+    if (myIds.length === 0) {
+      setMyBookings([]);
       return;
     }
+
+    const mine = bookings.filter((b) =>
+      myIds.includes(String(b.listingId))
+    );
+
+    setMyBookings(mine);
+  }, [myIds, bookings]);
+
+  // 4) 初始加载
+  useEffect(() => {
+    fetchMyListings();
+    fetchBookings();
+  }, [userEmail]);
+
+  // 删除房源
+  const handleDelete = async (id) => {
+    const ok = confirm('Are you sure?');
+    if (!ok) return;
 
     const token = localStorage.getItem('token');
 
     try {
-      const res = await fetch(`http://localhost:5005/listings/${id}`,{
+      const res = await fetch(`http://localhost:5005/listings/${id}`, {
         method: 'DELETE',
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+        headers: { Authorization: `Bearer ${token}` },
       });
 
-      if (! res.ok){
+      if (!res.ok) {
         const err = await res.json();
         alert(err.error || 'Delete failed');
         return;
       }
+
       alert('Delete complete');
       fetchMyListings();
-    } catch(err){
+    } catch (err) {
       console.error(err);
       alert('Delete error');
     }
-  }
+  };
 
-
+  // ====== UI ======
   return (
     <Container fluid px={20}>
-      
-      {/* title */}
       <Group position="apart" mb="md">
         <Group>
           <Title order={2}>My Host Listings</Title>
@@ -94,7 +111,7 @@ function HostListings() {
             {houseNumber} total
           </Badge>
         </Group>
-  
+
         <Button
           variant="filled"
           color="green"
@@ -104,24 +121,21 @@ function HostListings() {
           Create a new listing
         </Button>
       </Group>
-  
-      {/* profit chart */}
+
+      {/* Profit Chart */}
       <div
-  style={{
-    height: "300px",
-    border: "1px dashed #aaa",
-    borderRadius: "8px",
-    marginBottom: "30px",
+        style={{
+          height: "300px",
+          border: "1px dashed #aaa",
+          borderRadius: "8px",
+          marginBottom: "30px",
+          paddingTop: "20px",
+        }}
+      >
+        <ProfitChart bookings={myBookings} />
+      </div>
 
-    paddingTop:"20px"
-  
-  }}
->
-  <ProfitChart bookings={bookings} />
-</div>
-
-  
-      {/* house listings */}
+      {/* Listing Cards */}
       {listingDetails.length === 0 ? (
         <Text c="dimmed">You have no listings yet.</Text>
       ) : (
@@ -136,10 +150,8 @@ function HostListings() {
           ))}
         </SimpleGrid>
       )}
-  
     </Container>
   );
-  
 }
 
 export default HostListings;
