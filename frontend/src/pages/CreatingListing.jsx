@@ -13,10 +13,12 @@ function CreatingListing() {
   const [propertyType, setPropertyType] = useState('');
   const [bathrooms, setBathroom] = useState(1);
   const [bedrooms, setBedrooms] = useState(1);
+  const [beds, setBeds] = useState(1);
   const [amenities, setAmenities] = useState([]);
   const [thumbnail, setThumbnail] = useState(null);
   const [images, setImages] = useState([]);
   const [errorMsg, setErrorMsg] = useState('');
+  const DEFAULT_THUMBNAIL ="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAgAAAAIAQMAAAD+wSzIAAAABlBMVEX///+/v7+jQ3Y5AAAADklEQVQI12P4AIX8EAgALgAD/aNpbtEAAAAASUVORK5CYII";
 
   // Convert File -> Base64
   const toBase64 = (file) => new Promise((resolve, reject) => {
@@ -51,6 +53,7 @@ function CreatingListing() {
         setPropertyType(l.metadata?.propertyType || '');
         setBathroom(l.metadata?.bathrooms || 1);
         setBedrooms(l.metadata?.bedrooms || 1);
+        setBeds(l.metadata?.beds || 1);
         setAmenities(l.metadata?.amenities || []);
         setImages(l.metadata?.images || []);
       } catch (err) {
@@ -62,18 +65,20 @@ function CreatingListing() {
 
   // submit form
   const handleSubmit = async () => {
-    if (!title || !address || !price || !propertyType || !thumbnail) {
-      setErrorMsg('All fields including thumbnail are required.');
+    if (!title || !address || !price || !propertyType) {
+      setErrorMsg("Please fill all required fields.");
       return;
-    }
+    }    
 
     const token = localStorage.getItem('token');
+    const finalThumbnail = thumbnail || DEFAULT_THUMBNAIL;
+
     const payload = {
       title,
       address,
       price,
-      thumbnail,
-      metadata: { propertyType, bathrooms, bedrooms, amenities, images }
+      thumbnail: finalThumbnail,
+      metadata: { propertyType, bathrooms, bedrooms, beds, amenities, images }
     };
 
     try {
@@ -109,7 +114,7 @@ function CreatingListing() {
       <Stack spacing="md" align="center">
         {/* upload thumbnail */}
         <div style={{ width: 600 }}>
-          <label>Main Thumbnail (Required)</label>
+          <label>Main Thumbnail (Optional)</label>
           <input type="file" accept="image/*" onChange={handleThumbnailUpload} />
           {thumbnail && <Image src={thumbnail} height={200} mt="md" alt="preview" />}
         </div>
@@ -142,7 +147,7 @@ function CreatingListing() {
 
         <Select
           label="Bedrooms"
-          data={['1', '2', '3', '4', '5+']}
+          data={['0','1', '2', '3', '4', '5+']}
           value={String(bedrooms)}
           onChange={(v) => setBedrooms(Number(v))}
           required
@@ -150,8 +155,17 @@ function CreatingListing() {
         />
 
         <Select
+          label="Beds"
+          data={['0','1', '2', '3', '4', '5+']}
+          value={String(beds)}
+          onChange={(v) => setBeds(Number(v))}
+          required
+          style={{ width: 600 }}
+        />
+
+        <Select
           label="Bathrooms"
-          data={['1', '2', '3', '4', '5+']}
+          data={['0','1', '2', '3', '4', '5+']}
           value={String(bathrooms)}
           onChange={(v) => setBathroom(Number(v))}
           required
