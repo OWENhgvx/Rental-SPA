@@ -87,6 +87,8 @@ export default function BookListingBox({
     setDateRange([null, null]);
   };
 
+  const todayDate=new Date();
+
   return (
     <Card shadow="sm" padding="md" radius="md" withBorder>
       <Title ta="center" size="xl">
@@ -95,8 +97,8 @@ export default function BookListingBox({
 
       {hasRange ? (
         <>
-          <Text fz="lg" fw={700}>
-            ${totalPrice} AUD
+          <Text fz="md" fw={700}>
+            Your total cost: ${totalPrice} AUD
           </Text>
           <Text size="sm" c="dimmed">
             for {nights} night{nights > 1 ? 's' : ''} · ${Number(price) || 0}/night
@@ -104,11 +106,11 @@ export default function BookListingBox({
         </>
       ) : (
         <>
-          <Text fz="lg" fw={700}>
-            ${Number(price) || 0} AUD
+          <Text fz="md" fw={700}>
+            Your total cost: ${Number(price) || 0} AUD
           </Text>
           <Text size="sm" c="dimmed">
-            per night
+            for ${Number(price) || 0} per night
           </Text>
         </>
       )}
@@ -116,7 +118,7 @@ export default function BookListingBox({
       <Popover opened={opened} onChange={setOpened} position="bottom" withArrow withinPortal shadow="md" offset={4}>
         <Popover.Target>
           <Flex mt="md" direction={{ base: 'column', md: 'row' }} gap="xs">
-            <Button fullWidth variant={hasRange ? 'filled' : 'light'} onClick={() => setOpened((o) => !o)}>
+            <Button fullWidth variant={hasRange ? 'light' : 'outline'} onClick={() => setOpened((o) => !o)}>
               <div style={{ textAlign: 'left' }}>
                 <Text size="sm" fw={600}>
                   CHECK-IN
@@ -127,7 +129,7 @@ export default function BookListingBox({
               </div>
             </Button>
 
-            <Button fullWidth variant={hasRange ? 'filled' : 'outline'} onClick={() => setOpened((o) => !o)}>
+            <Button fullWidth variant={hasRange ? 'light' : 'outline'} onClick={() => setOpened((o) => !o)}>
               <div style={{ textAlign: 'left' }}>
                 <Text size="sm" fw={600}>
                   CHECK-OUT
@@ -142,7 +144,7 @@ export default function BookListingBox({
 
         <Popover.Dropdown>
           <Fieldset legend="Choose date range" radius="md">
-            <DatePicker type="range" allowDeselect value={dateRange} onChange={handleChange} />
+            <DatePicker minDate={todayDate} type="range" allowDeselect value={dateRange} onChange={handleChange} />
           </Fieldset>
         </Popover.Dropdown>
       </Popover>

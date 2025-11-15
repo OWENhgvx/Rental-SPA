@@ -14,6 +14,8 @@ export default function DateFilter({onCommit,resetDate}) {
   const dateText=date[0]===null?'Choose date':date[1]===null?`At ${date[0]}`:`From ${date[0]} To ${date[1]}`;
   const labelText=picked?dateText:"Choose date";
 
+  const todayDate=new Date();
+
   useEffect(()=> {
     setDate([null,null]);
     onCommit?.(null);
@@ -37,6 +39,7 @@ export default function DateFilter({onCommit,resetDate}) {
         <Fieldset legend="Choose date range" radius="md">
           <DatePicker allowDeselect
             value={date}
+            minDate={todayDate}
             type="range"
             onChange={(value)=>{
               setDate(value);
