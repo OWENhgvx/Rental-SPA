@@ -44,8 +44,9 @@ function Register() {
       }
 
       // Registration success logic here
-      // localStorage.setItem('token', data.token);
-      // navigate('/listings');
+      localStorage.setItem('token', data.token);
+      localStorage.setItem('email', form.email);
+      navigate('/');
     } catch (err) {
       setErrorMsg(err.message || 'Registration failed, please try again.');
     }
