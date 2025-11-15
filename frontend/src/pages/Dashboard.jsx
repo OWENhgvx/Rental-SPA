@@ -80,6 +80,8 @@ export default function Dashboard() {
     let list = allCards.filter((c) => {
       if (!matchesQuery(c, filters.q)) return false;
 
+      if (c.availability) return false;
+      
       if (filters.beds && Array.isArray(filters.beds)) {
         const [mn, mx] = filters.beds;
         if (!between(c.bedrooms, mn, mx)) return false;
