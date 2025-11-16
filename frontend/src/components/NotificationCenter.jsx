@@ -1,14 +1,4 @@
-import {
-  ActionIcon,
-  Box,
-  Button,
-  Group,
-  Indicator,
-  Menu,
-  ScrollArea,
-  Stack,
-  Text,
-} from '@mantine/core';
+import {ActionIcon,Box,Button,Group,Indicator,Menu,ScrollArea,Stack,Text,} from '@mantine/core';
 import { IconBellRinging, IconBellRingingFilled } from '@tabler/icons-react';
 import { notifications as notificationsApi } from '@mantine/notifications';
 import { useEffect, useMemo, useState } from 'react';
@@ -20,7 +10,6 @@ const LS_PREV_HOST_KEY = 'airbrb_prev_host_bookings_v1';
 
 export default function NotificationCenter() {
   const [notifList, setNotifList] = useState([]);
-
   useEffect(() => {
     try {
       const stored = localStorage.getItem(LS_NOTIF_KEY);
@@ -187,7 +176,54 @@ export default function NotificationCenter() {
         </Indicator>
       </Menu.Target>
 
+      <Menu.Dropdown>
+        <Box px="sm" py="xs">
+          <Group justify="space-between" mb="xs">
+            <Text fw={500}>Notifications</Text>
+            {unreadCount > 0 && (
+              <Button
+                variant="subtle"
+                size="compact-xs"
+                onClick={markAllRead}
+              >
+                Mark all as read
+              </Button>
+            )}
+          </Group>
 
+          {notifList.length === 0 ? (
+            <Text c="dimmed" size="sm">
+              No notifications yet
+            </Text>
+          ) : (
+            <ScrollArea h={260}>
+              <Stack gap="xs">
+                {notifList.map((n) => (
+                  <Box
+                    key={n.id}
+                    p="xs"
+                    style={{
+                      borderRadius: 8,
+                      backgroundColor: n.read ? '#f1f3f5' : '#e7f5ff',
+                      cursor: 'pointer',
+                    }}
+                    onClick={() => markOneRead(n.id)}
+                  >
+                    <Text size="xs" c="dimmed">
+                      {new Date(n.createdAt).toLocaleString()}
+                    </Text>
+                    <Text size="sm" fw={n.read ? 400 : 600}>
+                      {n.title}
+                    </Text>
+                    <Text size="sm">{n.message}</Text>
+                  </Box>
+                ))}
+
+              </Stack>
+            </ScrollArea>
+          )}
+        </Box>
+      </Menu.Dropdown>
     </Menu>
   );
 }
