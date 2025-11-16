@@ -108,7 +108,7 @@ export async function GetUnqiueListingBookingDetail(listingid,token){
 // send comment to this listing
 export async function SendComment(listingid,bookingid,token,rate,comment){
 
-  const res=await fetch(`${NET_ADDRESS}/listings/${listingid}/reviews/${bookingid}`,{
+  const res=await fetch(`${NET_ADDRESS}/listings/${listingid}/review/${bookingid}`,{
 
     method: 'PUT',
     headers: {
@@ -123,7 +123,6 @@ export async function SendComment(listingid,bookingid,token,rate,comment){
       } 
     })
   });
-
 
   if (!res.ok) {
     const data = await res.json().catch(() => ({}));
