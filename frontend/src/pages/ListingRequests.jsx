@@ -77,8 +77,8 @@ function ListingRequests() {
       const allBookings = Array.isArray(rawBookings)
         ? rawBookings
         : rawBookings && typeof rawBookings === "object"
-        ? Object.values(rawBookings)
-        : [];
+          ? Object.values(rawBookings)
+          : [];
 
       const related = allBookings.filter(
         (b) => String(b.listingId) === String(listingId)

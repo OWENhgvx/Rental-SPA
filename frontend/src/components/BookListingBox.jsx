@@ -130,7 +130,7 @@ export default function BookListingBox({
   return (
     <Card shadow="sm" padding="md" radius="md" withBorder>
       <Title ta="center" size="xl">Start your trip 🚀</Title>
-
+      <Divider my="md" />
       {hasRange ? (
         <>
           <Text fz="md" fw={700}>Your total cost: ${totalPrice} AUD</Text>
