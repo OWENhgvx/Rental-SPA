@@ -161,7 +161,7 @@ export async function GetHostBookingDetail(token,hostemail){
   const bookList=[];
   data.bookings.forEach(element => {
 
-    if(hostListings.includes(element.id)){
+    if(hostListings.includes(element.listingId)){
       bookList.push(element)
     }
   });
