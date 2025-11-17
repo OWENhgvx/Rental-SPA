@@ -10,6 +10,11 @@ function Login() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      setErrorMsg("Invalid email format");
+      return;
+    }  
 
     try {
       const res = await fetch('http://localhost:5005/user/auth/login', {
@@ -23,10 +28,9 @@ function Login() {
         throw new Error(data.error);
       }
 
-      // Login success logic
       localStorage.setItem('token', data.token);
-      localStorage.setItem('email',email);
-      // navigate('/dashboard'); // Or other page
+      localStorage.setItem('email', email);
+      navigate('/');
     } catch (err) {
       setErrorMsg(err.message || 'Login failed, please try again.');
     }
@@ -67,8 +71,20 @@ function Login() {
 
             {errorMsg && <Text color="red">{errorMsg}</Text>}
 
-            <Button type="submit" fullWidth onClick={()=> navigate('/')}>
+            <Button type="submit" fullWidth>
               Login
+            </Button>
+
+            {/* Guest Login Button */}
+            <Button
+              variant="outline"
+              color="gray"
+              fullWidth
+              onClick={() => {
+                navigate('/');
+              }}
+            >
+              Continue as Guest
             </Button>
           </Stack>
         </form>

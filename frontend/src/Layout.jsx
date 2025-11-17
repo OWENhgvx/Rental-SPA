@@ -13,6 +13,7 @@ export default function Layout() {
 
   const handleLogout = () => {
     localStorage.clear();
+    navigate('/login');
   };
 
   return (

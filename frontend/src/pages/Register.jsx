@@ -20,6 +20,12 @@ function Register() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    if (!emailRegex.test(form.email)) {
+      setErrorMsg("Invalid email format");
+      return;
+    }
 
     if (form.password !== form.confirmPassword) {
       setErrorMsg('Passwords do not match. Please try again.');
@@ -107,7 +113,7 @@ function Register() {
 
             {errorMsg && <Text color="red">{errorMsg}</Text>}
 
-            <Button type="submit" fullWidth onClick={()=> navigate('/')}>
+            <Button type="submit" fullWidth >
               Register
             </Button>
           </Stack>
