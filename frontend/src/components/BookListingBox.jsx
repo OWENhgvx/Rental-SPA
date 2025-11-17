@@ -127,6 +127,18 @@ export default function BookListingBox({
     return !allowed;
   };
 
+  if (!token) {
+    return (
+      <Card shadow="sm" padding="md" radius="md" withBorder>
+        <Title ta="center" size="xl">Start your trip 🚀</Title>
+        <Divider my="md" />
+        <Text size="sm" c="dimmed" ta="center">
+          You are not logged in, so you cannot make a booking.
+        </Text>
+      </Card>
+    );
+  }
+
   return (
     <Card shadow="sm" padding="md" radius="md" withBorder>
       <Title ta="center" size="xl">Start your trip 🚀</Title>

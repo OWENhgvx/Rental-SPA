@@ -1,19 +1,22 @@
 // src/components/CommentBar.jsx
 import { useEffect, useMemo, useState } from 'react';
-import {Card, Stack, Group, Select, Textarea, Button, Text, Rating} from '@mantine/core';
+import {Card,Stack,Group,Select,Textarea,Button,Text,Rating} from '@mantine/core';
 import { notifications } from '@mantine/notifications';
+import { useNavigate } from 'react-router-dom';
 import { GetSuccessListingBookingDetail } from '../api/BookingApi.js';
 import { SendComment } from '../api/GetListingDetail.js';
 
 export default function CommentBar({ listingId }) {
   const token = localStorage.getItem('token');
   const email = localStorage.getItem('email');
+  const navigate = useNavigate();
 
   const [bookings, setBookings] = useState([]);
   const [bookingId, setBookingId] = useState(null); // string
   const [score, setScore] = useState(0);
   const [comment, setComment] = useState('');
 
+  const isLoggedIn = !!token && !!email;
   const hasBookings = Array.isArray(bookings) && bookings.length > 0;
 
   const bookingOptions = useMemo(() => {
@@ -40,7 +43,7 @@ export default function CommentBar({ listingId }) {
   }, [bookings]);
 
   const submit = async () => {
-    if (!token) {
+    if (!isLoggedIn) {
       notifications.show({ color: 'red', message: 'Please login first.' });
       return;
     }
@@ -74,7 +77,7 @@ export default function CommentBar({ listingId }) {
     let cancelled = false;
 
     (async () => {
-      if (!token || !email) {
+      if (!isLoggedIn) {
         setBookings([]);
         setBookingId(null);
         return;
@@ -105,17 +108,31 @@ export default function CommentBar({ listingId }) {
     return () => {
       cancelled = true;
     };
-  }, [token, email, listingId]);
+  }, [isLoggedIn, token, email, listingId]);
+
+  if (!isLoggedIn) {
+    return (
+      <Card withBorder radius="md" mt="md" p="md" style={{ opacity: 0.6 }}>
+        <Stack gap="sm" align="center">
+          <Text fw={600}>Leave a review</Text>
+          <Text size="sm" c="dimmed" ta="center">
+            Please login to view your bookings and leave a review for this listing.
+          </Text>
+          <Button
+            size="xs"
+            variant="light"
+            onClick={() => navigate('/login')}
+          >
+            Go to login
+          </Button>
+        </Stack>
+      </Card>
+    );
+  }
 
   if (!hasBookings) {
     return (
-      <Card
-        withBorder
-        radius="md"
-        mt="md"
-        p="md"
-        style={{ opacity: 0.5 }}
-      >
+      <Card withBorder radius="md" mt="md" p="md" style={{ opacity: 0.5 }}>
         <Stack gap="sm" align="center">
           <Text fw={600}>Leave a review</Text>
           <Text size="sm" c="dimmed" ta="center">
