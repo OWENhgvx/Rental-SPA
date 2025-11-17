@@ -144,6 +144,7 @@ function HostListings() {
             <HouseCard
               key={item.id}
               onDelete={handleDelete}
+              onRefresh={fetchMyListings}   // 新增
               pageState="host"
               cardInfo={item}
             />
