@@ -1,0 +1,19 @@
+{
+    "title": "JSON Listing",
+    "address": "123 Regent Avenue, Sydney",
+    "price": 1,
+    "thumbnail": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAIAAAAlC+aJAAAAhUlEQVR4nOzRQQmCURBGUZG3sM5rYgnDWMON4N42FrCFKcbLD+cE+IbLrH2/niY9bq/R/fPo+h8IqAmoCagJqAmoCagJqAmoCagJqAmoCagJqAmoCaity36OHvh+3qP7h/+AgJqAmoCagJqAmoCagJqAmoCagJqAmoCagJqAmoDaLwAA//8LhAaa+TSfsgAAAABJRU5ErkJggg==",
+    "metadata": {
+      "propertyType": "Apartment",
+      "bathrooms": 7,
+      "bedrooms": 6,
+      "beds": 3,
+      "amenities": ["Wi-Fi", "Kitchen"],
+      "images": [
+        "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAIAAAAlC+aJAAAAhElEQVR4nOzZMRHCYBAGUYb5B3eYwBFC6GixgAFaVKSKg3SXbd4T8N1sfev+e1wmvb+30f3r6PoJBNQE1ATUBNQE1ATUBNQE1ATUBNQE1ATUBNQE1ATU1vZ8jR74f/wHDgmoCagJqAmoCagJqAmoCagJqAmoCagJqAmoCagJqO0BAAD//1q1B3aKBj/oAAAAAElFTkSuQmCC",
+        "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAIAAAAlC+aJAAAAhklEQVR4nOzRUQkCYRBGUZG/gaAvVvDZWoawhR2MYQP7bIrZy8I5Ab7hMut/e54m/a7f0f3z6PoOBNQE1ATUBNQE1ATUBNQE1ATUBNQE1ATUBNQE1ATU1vvzGD3wul9G9w//AQE1ATUBNQE1ATUBNQE1ATUBNQE1ATUBNQE1ATUBtS0AAP//la8FHfqWUqwAAAAASUVORK5CYII=",
+        "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAIAAAAlC+aJAAAAhElEQVR4nOzRUQkCYRBGUdH/3TS2EKxlFmP4aAvZIpti9rJwToBvuMz6v76XSc/bY3T/Orp+AAE1ATUBNQE1ATUBNQE1ATUBNQE1ATUBNQE1ATUBtfX+rNED2+8+un/6DwioCagJqAmoCagJqAmoCagJqAmoCagJqAmoCagJqO0BAAD///eFBe0/N3LfAAAAAElFTkSuQmCC"
+      ]
+    }
+  }
+  
