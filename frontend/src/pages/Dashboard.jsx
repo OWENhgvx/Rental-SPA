@@ -3,6 +3,7 @@ import { Container, Stack, SimpleGrid, Text } from '@mantine/core';
 import Searchbar from '../components/Searchbar';
 import HouseCard from '../components/HouseCard';
 import { GetAllListing, GetCardInfo } from '../api/GetListingDetail.js';
+import { GetUserBookingDetail } from '../api/BookingApi.js';
 
 function matchesQuery(card, q) {
   if (!q || !q.trim()) return true;
@@ -57,6 +58,8 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
+  const [priorityListingIds, setPriorityListingIds] = useState([]);
+
   const [filters, setFilters] = useState({
     q: '',
     beds: null,
@@ -64,6 +67,9 @@ export default function Dashboard() {
     price: null,
     ratingSort: 'none',
   });
+
+  const token = localStorage.getItem('token');
+  const email = localStorage.getItem('email');
 
   useEffect(() => {
     let cancelled = false;
@@ -103,21 +109,73 @@ export default function Dashboard() {
     return () => { cancelled = true; };
   }, []);
 
+  useEffect(() => {
+    let cancelled = false;
+
+    (async () => {
+      if (!token || !email) {
+        setPriorityListingIds([]);
+        return;
+      }
+
+      try {
+        const bookings = await GetUserBookingDetail(token, email);
+        if (cancelled) return;
+
+        const ids = [];
+        bookings.forEach((b) => {
+          if (b.status === 'accepted' || b.status === 'pending') {
+            if (!ids.includes(b.listingId)) {
+              ids.push(b.listingId);
+            }
+          }
+        });
+
+        setPriorityListingIds(ids);
+      } catch (e) {
+        if (!cancelled) {
+          console.error('Failed to load user bookings for dashboard', e);
+          setPriorityListingIds([]);
+        }
+      }
+    })();
+
+    return () => { cancelled = true; };
+  }, [token, email]);
+
   const handleSearch = (payload) => {
     setFilters((prev) => ({ ...prev, ...payload }));
   };
 
   const visible = useMemo(() => {
+    const prioritySet = new Set(priorityListingIds);
+
     let list = allCards.filter((c) => {
       if (!matchesQuery(c, filters.q)) return false;
 
-      if (filters.beds && Array.isArray(filters.beds)) {
-        const [mn, mx] = filters.beds;
+      let bedRange = null;
+      if (filters.beds) {
+        if (Array.isArray(filters.beds)) {
+          bedRange = filters.beds;
+        } else if (Array.isArray(filters.beds.range)) {
+          bedRange = filters.beds.range;
+        }
+      }
+      if (bedRange && Array.isArray(bedRange)) {
+        const [mn, mx] = bedRange;
         if (!between(c.bedrooms, mn, mx)) return false;
       }
 
-      if (filters.price && Array.isArray(filters.price)) {
-        const [mn, mx] = filters.price;
+      let priceRange = null;
+      if (filters.price) {
+        if (Array.isArray(filters.price)) {
+          priceRange = filters.price;
+        } else if (Array.isArray(filters.price.range)) {
+          priceRange = filters.price.range;
+        }
+      }
+      if (priceRange && Array.isArray(priceRange)) {
+        const [mn, mx] = priceRange;
         if (!between(c.price, mn, mx)) return false;
       }
 
@@ -131,18 +189,46 @@ export default function Dashboard() {
       return true;
     });
 
-    if (filters.ratingSort === 'desc') {
-      list.sort((a, b) => Number(b.rating ?? 0) - Number(a.rating ?? 0));
-    } else if (filters.ratingSort === 'asc') {
-      list.sort((a, b) => Number(a.rating ?? 0) - Number(b.rating ?? 0));
-    } else {
-      list.sort((a, b) =>
-        String(a.title || '').localeCompare(String(b.title || ''))
-      );
-    }
+    const bedSort =
+      filters.beds && typeof filters.beds.sort === 'string'
+        ? filters.beds.sort
+        : 'none';
+
+    const priceSort =
+      filters.price && typeof filters.price.sort === 'string'
+        ? filters.price.sort
+        : 'none';
+
+    list.sort((a, b) => {
+      const aPriority = prioritySet.has(a.id);
+      const bPriority = prioritySet.has(b.id);
+
+      if (aPriority && !bPriority) return -1;
+      if (!aPriority && bPriority) return 1;
+
+      if (filters.ratingSort === 'desc') {
+        return Number(b.rating ?? 0) - Number(a.rating ?? 0);
+      } else if (filters.ratingSort === 'asc') {
+        return Number(a.rating ?? 0) - Number(b.rating ?? 0);
+      }
+
+      if (priceSort === 'asc') {
+        return Number(a.price ?? 0) - Number(b.price ?? 0);
+      } else if (priceSort === 'desc') {
+        return Number(b.price ?? 0) - Number(a.price ?? 0);
+      }
+
+      if (bedSort === 'asc') {
+        return Number(a.bedrooms ?? 0) - Number(b.bedrooms ?? 0);
+      } else if (bedSort === 'desc') {
+        return Number(b.bedrooms ?? 0) - Number(a.bedrooms ?? 0);
+      }
+
+      return String(a.title || '').localeCompare(String(b.title || ''));
+    });
 
     return list;
-  }, [allCards, filters]);
+  }, [allCards, filters, priorityListingIds]);
 
   return (
     <Container size="lg" py="md">
