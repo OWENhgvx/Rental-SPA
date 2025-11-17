@@ -48,6 +48,36 @@ function CreatingListing() {
     return match ? match[1] : null;
   };
 
+  const isValidBase64Image = (str) => {
+    // must start with data URI scheme
+    if (!/^data:image\/[a-zA-Z]+;base64,/.test(str)) return false;
+  
+    const base64Part = str.split(',')[1];
+    try {
+      // try to decode
+      atob(base64Part);
+      return true;
+    } catch (e) {
+      return false;
+    }
+  };
+
+  const resetFormFromJson = () => {
+    setTitle('');
+    setAddress('');
+    setPrice(100);
+    setThumbnail(null);
+    setThumbnailUrl('');
+  
+    setPropertyType('');
+    setBathroom(1);
+    setBedrooms(1);
+    setBeds(1);
+    setAmenities([]);
+    setImages([]);
+  
+    setErrorMsg('');
+  };
   const handleJsonUpload = async (e) => {
     const input = e.target;
     const file = input.files && input.files[0];
@@ -60,31 +90,50 @@ function CreatingListing() {
       try {
         obj = JSON.parse(text);
       } catch (err) {
+        resetFormFromJson();
         setErrorMsg("JSON format error: cannot parse.");
         return;
       }
   
       if (!obj.title || !obj.address || obj.price == null) {
+        resetFormFromJson();
         setErrorMsg("Invalid JSON structure: missing required fields.");
 
         return;
       }
   
       if (!obj.metadata) {
+        resetFormFromJson();
         setErrorMsg("Invalid JSON structure: metadata is missing.");
 
         return;
       }
+
   
       const m = obj.metadata;
+
+      // ========== Thumbnail validation (base64 or YouTube) ==========
+      if (obj.thumbnail) {
+        const isBase64 = isValidBase64Image(obj.thumbnail);
+        const ytId = extractYoutubeId(obj.thumbnail);
+
+        if (!isBase64 && !ytId) {
+          resetFormFromJson();
+          setErrorMsg("Invalid JSON: thumbnail must be a valid base64 image or YouTube URL.");
+          return;
+        }
+      }
+
   
       if (!m.propertyType) {
+        resetFormFromJson();
         setErrorMsg("Invalid JSON: metadata.propertyType is required.");
  
         return;
       }
   
       if (typeof obj.price !== "number" || obj.price <= 0) {
+        resetFormFromJson();
         setErrorMsg("Invalid JSON: price must be a positive number.");
    
         return;
@@ -95,28 +144,44 @@ function CreatingListing() {
         typeof m.beds !== "number" ||
         typeof m.bathrooms !== "number"
       ) {
+        resetFormFromJson();
         setErrorMsg("Invalid JSON: bedrooms/beds/bathrooms must be numbers.");
 
         return;
       }
   
       if (m.bedrooms < 0 || m.beds < 0 || m.bathrooms < 0) {
+        resetFormFromJson();
         setErrorMsg("Invalid JSON: bedrooms/beds/bathrooms cannot be negative.");
 
         return;
       }
   
       if (m.amenities && !Array.isArray(m.amenities)) {
+        resetFormFromJson();
         setErrorMsg("Invalid JSON: amenities must be an array.");
   
         return;
       }
   
       if (m.images && !Array.isArray(m.images)) {
+        resetFormFromJson();
         setErrorMsg("Invalid JSON: images must be an array.");
   
         return;
       }
+
+      // ========== Images validation (base64 only) ==========
+    if (Array.isArray(m.images)) {
+      for (const img of m.images) {
+        if (!isValidBase64Image(img)) {
+          resetFormFromJson();
+          setErrorMsg("Invalid JSON: one of the images is not a valid base64 image.");
+          return;
+        }
+      }
+    }
+
   
       // 写入表单
       setTitle(obj.title);
@@ -143,32 +208,6 @@ function CreatingListing() {
       if (jsonInputRef.current) {
         jsonInputRef.current.value = "";
       }
-    }
-  };
-
-  const handleThumbnailUrl = (value) => {
-    setThumbnailUrl(value);
-  
-    if (!value) return;
-  
-    const id = extractYoutubeId(value);
-    if (!id) {
-      setErrorMsg("Invalid YouTube URL.");
-      return;
-    }
-  
-    setThumbnail(value);
-    setErrorMsg('');
-  };
-  
-  
-
-  const handleThumbnailUpload = async (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      setThumbnailUrl('');
-      const base64 = await toBase64(file);
-      setThumbnail(base64);
     }
   };
 
@@ -201,6 +240,38 @@ function CreatingListing() {
     };
     if (isEditMode) fetchListing();
   }, [isEditMode, id]);
+
+
+  // 处理 YouTube URL 输入
+  const handleThumbnailUrlChange = (value) => {
+    setThumbnailUrl(value);
+
+    if (!value) {
+      setThumbnail(null);
+      setErrorMsg("");
+      return;
+    }
+
+    const id = extractYoutubeId(value);
+    if (!id) {
+      setErrorMsg("Invalid YouTube URL.");
+      return;
+    }
+
+    setThumbnail(value);
+    setErrorMsg("");
+  };
+
+
+  // 处理图片上传
+  const handleThumbnailFileChange = async (file) => {
+    if (file) {
+      const base64 = await toBase64(file);
+      setThumbnail(base64);
+      setThumbnailUrl("");
+      setErrorMsg("");
+    }
+  };
 
   // submit form
   const handleSubmit = async () => {
@@ -251,17 +322,35 @@ function CreatingListing() {
   
       <Stack spacing="md" align="center">
   
-        {/* JSON upload */}
-        {!isEditMode && (
+      {/* JSON upload */}
+      {!isEditMode && (
+        <div style={{ width: 600 }}>
           <FileInput
-            key={jsonInputKey}     // force remount to clear value
+            key={jsonInputKey}
             label="Upload Listing JSON (Optional)"
+            labelProps={{ style: { fontWeight: 700 } }}
             placeholder="Select JSON file"
             accept="application/json"
             onChange={(file) => file && handleJsonUpload({ target: { files: [file] } })}
-            style={{ width: 600 }}
+            ref={jsonInputRef}
+            style={{ width: '100%' }}
           />
-        )}
+
+          <Button
+            mt="sm"
+            color="red"
+            variant="outline"
+            onClick={() => {
+              resetFormFromJson();
+              setJsonInputKey((k) => k + 1); // 强制重置 FileInput
+            }}
+            style={{ width: '100%' }}
+          >
+            Clear JSON
+          </Button>
+        </div>
+      )}
+
 
         {/* Thumbnail unified input */}
         <div style={{ width: 600 }}>
@@ -274,43 +363,20 @@ function CreatingListing() {
               style={{ flex: 1 }}
               placeholder="Enter YouTube URL"
               value={thumbnailUrl}
-              disabled={thumbnail && thumbnail.startsWith("data:image")}  // invalid URL after upload
-              onChange={(e) => {
-                const value = e.target.value;
-                setThumbnailUrl(value);
-
-                if (!value) {
-                  setThumbnail(null);
-                  setErrorMsg("");
-                  return;
-                }
-
-                const id = extractYoutubeId(value);
-                if (!id) {
-                  setErrorMsg("Invalid YouTube URL.");
-                  return;
-                }
-
-                setThumbnail(value);     // valid URL
-                setErrorMsg("");
-              }}
+              disabled={thumbnail && thumbnail.startsWith("data:image")}
+              onChange={(e) => handleThumbnailUrlChange(e.target.value)}
             />
+
 
             {/* file upload */}
             <FileInput
               placeholder="Upload"
               accept="image/*"
-              disabled={thumbnail && extractYoutubeId(thumbnail)}  // invalid URL after upload
-              onChange={async (file) => {
-                if (file) {
-                  const base64 = await toBase64(file);
-                  setThumbnail(base64);
-                  setThumbnailUrl("");   // clear URL input
-                  setErrorMsg("");
-                }
-              }}
+              disabled={thumbnail && extractYoutubeId(thumbnail)}
+              onChange={handleThumbnailFileChange}
               style={{ width: 120 }}
             />
+
 
             {/* Clear button */}
             <Button
@@ -352,6 +418,7 @@ function CreatingListing() {
         <div style={{ width: 600 }}>
           <FileInput
             label="Gallery Images (Optional)"
+            labelProps={{ style: { fontWeight: 700 } }}
             placeholder="Select images"
             accept="image/*"
             multiple
@@ -367,6 +434,7 @@ function CreatingListing() {
         {/* forms */}
         <TextInput
           label="Title"
+          labelProps={{ style: { fontWeight: 700 } }}
           value={title}
           onChange={(e) => setTitle(e.target.value)}
           required
@@ -375,6 +443,7 @@ function CreatingListing() {
   
         <TextInput
           label="Address"
+          labelProps={{ style: { fontWeight: 700 } }}
           value={address}
           onChange={(e) => setAddress(e.target.value)}
           required
@@ -383,6 +452,7 @@ function CreatingListing() {
   
         <NumberInput
           label="Price per night (AUD)"
+          labelProps={{ style: { fontWeight: 700 } }}
           value={price}
           onChange={setPrice}
           required
@@ -392,6 +462,7 @@ function CreatingListing() {
   
         <Select
           label="Property Type"
+          labelProps={{ style: { fontWeight: 700 } }}
           placeholder="Select type"
           data={['Apartment', 'House', 'Studio', 'Townhouse']}
           value={propertyType}
@@ -402,6 +473,7 @@ function CreatingListing() {
   
         <Select
           label="Bedrooms"
+          labelProps={{ style: { fontWeight: 700 } }}
           data={['0','1','2','3','4','5','6','7','8','9','9+']}
           value={toSelectValue(bedrooms)}
           onChange={(v) => setBedrooms(v === '9+' ? 10 : Number(v))}
@@ -411,6 +483,7 @@ function CreatingListing() {
   
         <Select
           label="Beds"
+          labelProps={{ style: { fontWeight: 700 } }}
           data={['0','1','2','3','4','5','6','7','8','9','9+']}
           value={toSelectValue(beds)}
           onChange={(v) => setBeds(v === '9+' ? 10 : Number(v))}
@@ -420,6 +493,7 @@ function CreatingListing() {
   
         <Select
           label="Bathrooms"
+          labelProps={{ style: { fontWeight: 700 } }}
           data={['0','1','2','3','4','5','6','7','8','9','9+']}
           value={toSelectValue(bathrooms)}
           onChange={(v) => setBathroom(v === '9+' ? 10 : Number(v))}
@@ -429,6 +503,7 @@ function CreatingListing() {
   
         <MultiSelect
           label="Amenities"
+          labelProps={{ style: { fontWeight: 700 } }}
           data={['Wi-Fi','Parking','AC','Pool','Kitchen','Washer','Gym','Balcony','TV']}
           value={amenities}
           onChange={setAmenities}

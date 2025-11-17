@@ -5,8 +5,8 @@
     "thumbnail": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAIAAAAlC+aJAAAAhUlEQVR4nOzRQQmCURBGUZG3sM5rYgnDWMON4N42FrCFKcbLD+cE+IbLrH2/niY9bq/R/fPo+h8IqAmoCagJqAmoCagJqAmoCagJqAmoCagJqAmoCaity36OHvh+3qP7h/+AgJqAmoCagJqAmoCagJqAmoCagJqAmoCagJqAmoDaLwAA//8LhAaa+TSfsgAAAABJRU5ErkJggg==",
     "metadata": {
       "propertyType": "Apartment",
-      "bathrooms": 7,
-      "bedrooms": 6,
+      "bathrooms": 1,
+      "bedrooms": 11,
       "beds": 3,
       "amenities": ["Wi-Fi", "Kitchen"],
       "images": [
