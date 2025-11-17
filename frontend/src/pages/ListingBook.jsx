@@ -7,11 +7,11 @@ import ListingImageDisplay from '../components/ListingImageDisplay.jsx';
 import RatingBox from '../components/RatingBox.jsx';
 import BookListingBox from '../components/BookListingBox.jsx';
 import CommentBar from '../components/CommentBar.jsx';
+import BookingStatusPanel from '../components/BookingStatusPanel.jsx';
 
 const MS_PER_DAY = 1000 * 60 * 60 * 24;
 
 export default function ListingBook() {
-  
   const { listingId } = useParams();
   const { state } = useLocation();
   const dateRange = state?.dates ?? [null, null];
@@ -19,7 +19,6 @@ export default function ListingBook() {
   const [listingDetail, setListingDetail] = useState(null);
   const [loading, setLoading] = useState(true);
   const [err, setErr] = useState(null);
-
 
   useEffect(() => {
     let cancelled = false;
@@ -45,10 +44,10 @@ export default function ListingBook() {
 
   const thumbnail = listingDetail.thumbnail;
   const rawImages = listingDetail.metadata?.images || [];
-  const listingImages=[];
+  const listingImages = [];
   if (thumbnail) listingImages.push(thumbnail);
   rawImages.forEach(image => {
-    if(image){
+    if (image) {
       listingImages.push(image);
     }
   });
@@ -81,7 +80,7 @@ export default function ListingBook() {
 
               <Text size="md" c='dimmed'>
                 {listingDetail.metadata?.bedrooms} bedroom🛏️ |{' '}
-                {listingDetail.metadata?.beds} {Number(listingDetail.metadata?.beds)===1?'bed😴':'beds😴'} |{' '}
+                {listingDetail.metadata?.beds} {Number(listingDetail.metadata?.beds) === 1 ? 'bed😴' : 'beds😴'} |{' '}
                 {listingDetail.metadata?.bathrooms} bathroom🛁
               </Text>
 
@@ -94,8 +93,8 @@ export default function ListingBook() {
                     </Badge>
                   ))}
                 </Group>
-
               </Title>
+
               {!hasRange ? (
                 <>
                   <Title size='md'>Price Per Night:</Title>
@@ -122,6 +121,8 @@ export default function ListingBook() {
                   </Text>
                 </Group>
               )}
+
+              <BookingStatusPanel listingId={listingId} />
 
               <BookListingBox
                 daterange={hasRange ? dateRange : [null, null]}
