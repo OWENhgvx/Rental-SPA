@@ -1,28 +1,27 @@
 // src/components/CommentBar.jsx
 import { useEffect, useMemo, useState } from 'react';
-import {
-  Card, Stack, Group, Select, Textarea, Button, Text, Rating
-} from '@mantine/core';
+import {Card, Stack, Group, Select, Textarea, Button, Text, Rating} from '@mantine/core';
 import { notifications } from '@mantine/notifications';
 import { GetSuccessListingBookingDetail } from '../api/BookingApi.js';
 import { SendComment } from '../api/GetListingDetail.js';
 
-export default function CommentBar({ listingId}) {
+export default function CommentBar({ listingId }) {
   const token = localStorage.getItem('token');
   const email = localStorage.getItem('email');
 
   const [bookings, setBookings] = useState([]);
-
   const [bookingId, setBookingId] = useState(null); // string
   const [score, setScore] = useState(0);
   const [comment, setComment] = useState('');
+
+  const hasBookings = Array.isArray(bookings) && bookings.length > 0;
 
   const bookingOptions = useMemo(() => {
     if (!Array.isArray(bookings)) return [];
     const fmt = (d) => {
       try {
         const date = new Date(d);
-        if (isNaN(date.getTime())) return String(d ?? '');
+        if (Number.isNaN(date.getTime())) return String(d ?? '');
         return date.toLocaleDateString();
       } catch {
         return String(d ?? '');
@@ -30,10 +29,9 @@ export default function CommentBar({ listingId}) {
     };
 
     return bookings.map((b) => {
-      const s = b.start || b.dateRange?.[0] || b.from;
-      const e = b.end || b.dateRange?.[1] || b.to;
-      const labelDate =
-        s && e ? ` (${fmt(s)} → ${fmt(e)})` : '';
+      const s = b.start || b.dateRange?.start || b.dateRange?.[0] || b.from;
+      const e = b.end || b.dateRange?.end || b.dateRange?.[1] || b.to;
+      const labelDate = s && e ? ` (${fmt(s)} → ${fmt(e)})` : '';
       return {
         value: String(b.id),
         label: `Booking #${b.id}${labelDate}`,
@@ -41,9 +39,7 @@ export default function CommentBar({ listingId}) {
     });
   }, [bookings]);
 
-
-  const submit=async()=>{
-
+  const submit = async () => {
     if (!token) {
       notifications.show({ color: 'red', message: 'Please login first.' });
       return;
@@ -61,36 +57,75 @@ export default function CommentBar({ listingId}) {
       return;
     }
 
-    try{
-
-      await SendComment(listingId,bookingId,token,score,comment)
+    try {
+      await SendComment(listingId, bookingId, token, score, comment);
       setScore(0);
       setComment('');
-
-    }catch(err){
-
+      notifications.show({ color: 'green', message: 'Review submitted.' });
+    } catch (err) {
       notifications.show({
-        message:err.message
-      })
+        color: 'red',
+        message: err.message || 'Failed to send review',
+      });
     }
-
-
   };
 
-  useEffect(()=>{
+  useEffect(() => {
+    let cancelled = false;
 
-    let cancelled=false;
-    (async()=>{
+    (async () => {
+      if (!token || !email) {
+        setBookings([]);
+        setBookingId(null);
+        return;
+      }
 
-      const successList= await GetSuccessListingBookingDetail(token,email,listingId);
-      if (cancelled) return ;
-      setBookings(successList);
-      setBookingId(successList.length===0?null:successList[0]);
+      try {
+        const successList = await GetSuccessListingBookingDetail(
+          token,
+          email,
+          listingId,
+        );
+        if (cancelled) return;
+        setBookings(successList || []);
+        if (successList && successList.length > 0) {
+          setBookingId(String(successList[0].id));
+        } else {
+          setBookingId(null);
+        }
+      } catch (e) {
+        if (!cancelled) {
+          console.error(e);
+          setBookings([]);
+          setBookingId(null);
+        }
+      }
     })();
 
-    return ()=>{cancelled=true;}
-  },[token,email,listingId]);
+    return () => {
+      cancelled = true;
+    };
+  }, [token, email, listingId]);
 
+  if (!hasBookings) {
+    return (
+      <Card
+        withBorder
+        radius="md"
+        mt="md"
+        p="md"
+        style={{ opacity: 0.5 }}
+      >
+        <Stack gap="sm" align="center">
+          <Text fw={600}>Leave a review</Text>
+          <Text size="sm" c="dimmed" ta="center">
+            You have not completed any accepted booking for this listing yet,
+            so you cannot leave a review.
+          </Text>
+        </Stack>
+      </Card>
+    );
+  }
 
   return (
     <Card withBorder radius="md" mt="md" p="md">
@@ -103,7 +138,7 @@ export default function CommentBar({ listingId}) {
             placeholder="Select a booking"
             data={bookingOptions}
             value={bookingId}
-            onChange={setBookingId}           
+            onChange={setBookingId}
             w={{ base: '100%', sm: '60%' }}
           />
 
