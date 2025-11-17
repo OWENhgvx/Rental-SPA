@@ -173,7 +173,7 @@ function HouseCard({onDelete,pageState,cardInfo}){
         <Group gap={4}>
           <Rating value={safeRating} fractions={2} readOnly size="sm" />
           <Text size="sm" c="dimmed">
-            {safeRating.toFixed(2)}·{safeReviews} reviews
+            {safeRating.toFixed(2)} | {safeReviews} reviews
           </Text>
         </Group>
       </Group>
