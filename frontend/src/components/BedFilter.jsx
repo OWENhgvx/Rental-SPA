@@ -1,4 +1,3 @@
-// components/BedFilter.jsx
 import { useState, useEffect } from 'react';
 import { Popover, Fieldset, Button, RangeSlider } from '@mantine/core';
 
@@ -12,23 +11,30 @@ export default function BedFilter({
   const [opened, setOpened] = useState(false);
   const [active, setActive] = useState(false); 
   const [range, setRange]   = useState([null, null]);
+  const [sort, setSort] = useState('none');
 
   useEffect(() => {
     setOpened(false);
     setActive(false);
     setRange([null, null]);
-    onCommit?.(null);
+    setSort('none');
+    onCommit?.({ range: null, sort: 'none' });
   }, [resetBed, onCommit]);
 
   const toText = (v) => (v >= max ? `${max}+` : String(v));
+
+  const sortSuffix =
+    sort === 'asc' ? ' (low → high)' :
+      sort === 'desc' ? ' (high → low)' :
+        '';
 
   const label = !active
     ? 'Choose bedroom number'
     : range[0] != null && range[1] != null
       ? (range[0] === range[1]
-        ? `Bedroom Number: ${toText(range[0])}`
-        : `Bedroom Number: ${toText(range[0])}–${toText(range[1])}`)
-      : `Bedroom Number: ${min}–${max}+`;
+        ? `Bedroom Number: ${toText(range[0])}${sortSuffix}`
+        : `Bedroom Number: ${toText(range[0])}–${toText(range[1])}${sortSuffix}`)
+      : `Bedroom Number: ${min}–${max}+${sortSuffix}`;
 
   const onButtonClick = () => {
     if (!opened) {
@@ -46,6 +52,24 @@ export default function BedFilter({
     const v = min + i;
     return { value: v, label: v === max ? `${max}+` : String(v) };
   });
+
+  const toggleSort = () => {
+    const next = sort === 'none' ? 'asc' : sort === 'asc' ? 'desc' : 'none';
+    setSort(next);
+
+    const payload = {
+      range: (range[0] == null && range[1] == null) ? null : range,
+      sort: next,
+    };
+    onCommit?.(payload);
+  };
+
+  const sortLabel =
+    sort === 'none'
+      ? 'Sort: none'
+      : sort === 'asc'
+        ? 'Sort: Bedroom low → high'
+        : 'Sort: Bedroom high → low';
 
   return (
     <Popover opened={opened} onChange={setOpened}>
@@ -66,7 +90,7 @@ export default function BedFilter({
             onChangeEnd={(final) => {
               setRange(final);
               setActive(true);
-              onCommit?.(final);
+              onCommit?.({ range: final, sort });
             }}
             minRange={0}
             marks={marks}
@@ -77,6 +101,15 @@ export default function BedFilter({
             }}
             w="100%"
           />
+
+          <Button
+            mt="xl"
+            variant="light"
+            fullWidth
+            onClick={toggleSort}
+          >
+            {sortLabel}
+          </Button>
         </Fieldset>
       </Popover.Dropdown>
     </Popover>

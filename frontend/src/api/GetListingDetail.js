@@ -59,6 +59,7 @@ export async function GetCardInfo(listingid) {
     thumbnail:listingData.thumbnail,
     price:listingData.price,
     bedrooms:listingData.metadata.bedrooms,
+    beds:listingData.metadata.beds,
     bathrooms:listingData.metadata.bathrooms,
     reviewsNum:listingData.reviews.length,
     rating:ratingRank,
