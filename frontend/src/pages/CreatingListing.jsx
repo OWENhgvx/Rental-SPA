@@ -19,6 +19,7 @@ function CreatingListing() {
   const [images, setImages] = useState([]);
   const [errorMsg, setErrorMsg] = useState('');
   const DEFAULT_THUMBNAIL ="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAgAAAAIAQMAAAD+wSzIAAAABlBMVEX///+/v7+jQ3Y5AAAADklEQVQI12P4AIX8EAgALgAD/aNpbtEAAAAASUVORK5CYII";
+  const [thumbnailUrl, setThumbnailUrl] = useState('');
   const [jsonInputKey, setJsonInputKey] = useState(0);
 
 
@@ -41,6 +42,12 @@ function CreatingListing() {
   }
   const toSelectValue = (n) => (n == 10? "9+": String(n))
 
+  const extractYoutubeId = (url) => {
+    const reg = /(?:youtube\.com\/.*v=|youtu\.be\/)([^&?/]+)/;
+    const match = url.match(reg);
+    return match ? match[1] : null;
+  };
+
   const handleJsonUpload = async (e) => {
     const input = e.target;
     const file = input.files && input.files[0];
@@ -54,19 +61,18 @@ function CreatingListing() {
         obj = JSON.parse(text);
       } catch (err) {
         setErrorMsg("JSON format error: cannot parse.");
-        setLastJsonSuccess(false);
         return;
       }
   
       if (!obj.title || !obj.address || obj.price == null) {
         setErrorMsg("Invalid JSON structure: missing required fields.");
-        setLastJsonSuccess(false);
+
         return;
       }
   
       if (!obj.metadata) {
         setErrorMsg("Invalid JSON structure: metadata is missing.");
-        setLastJsonSuccess(false);
+
         return;
       }
   
@@ -74,13 +80,13 @@ function CreatingListing() {
   
       if (!m.propertyType) {
         setErrorMsg("Invalid JSON: metadata.propertyType is required.");
-        setLastJsonSuccess(false);
+ 
         return;
       }
   
       if (typeof obj.price !== "number" || obj.price <= 0) {
         setErrorMsg("Invalid JSON: price must be a positive number.");
-        setLastJsonSuccess(false);
+   
         return;
       }
   
@@ -90,25 +96,25 @@ function CreatingListing() {
         typeof m.bathrooms !== "number"
       ) {
         setErrorMsg("Invalid JSON: bedrooms/beds/bathrooms must be numbers.");
-        setLastJsonSuccess(false);
+
         return;
       }
   
       if (m.bedrooms < 0 || m.beds < 0 || m.bathrooms < 0) {
         setErrorMsg("Invalid JSON: bedrooms/beds/bathrooms cannot be negative.");
-        setLastJsonSuccess(false);
+
         return;
       }
   
       if (m.amenities && !Array.isArray(m.amenities)) {
         setErrorMsg("Invalid JSON: amenities must be an array.");
-        setLastJsonSuccess(false);
+  
         return;
       }
   
       if (m.images && !Array.isArray(m.images)) {
         setErrorMsg("Invalid JSON: images must be an array.");
-        setLastJsonSuccess(false);
+  
         return;
       }
   
@@ -139,12 +145,31 @@ function CreatingListing() {
       }
     }
   };
+
+  const handleThumbnailUrl = (value) => {
+    setThumbnailUrl(value);
+  
+    if (!value) return;
+  
+    const id = extractYoutubeId(value);
+    if (!id) {
+      setErrorMsg("Invalid YouTube URL.");
+      return;
+    }
+  
+    setThumbnail(value);
+    setErrorMsg('');
+  };
   
   
 
   const handleThumbnailUpload = async (e) => {
     const file = e.target.files[0];
-    if (file) setThumbnail(await toBase64(file));
+    if (file) {
+      setThumbnailUrl('');
+      const base64 = await toBase64(file);
+      setThumbnail(base64);
+    }
   };
 
   const handleImagesUpload = async (e) => {
@@ -229,7 +254,7 @@ function CreatingListing() {
         {/* JSON upload */}
         {!isEditMode && (
           <FileInput
-            key={jsonInputKey}     // ★ 每次 key 变化，FileInput 会被重置
+            key={jsonInputKey}     // force remount to clear value
             label="Upload Listing JSON (Optional)"
             placeholder="Select JSON file"
             accept="application/json"
@@ -237,16 +262,90 @@ function CreatingListing() {
             style={{ width: 600 }}
           />
         )}
-  
-        {/* upload thumbnail */}
+
+        {/* Thumbnail unified input */}
         <div style={{ width: 600 }}>
-          <FileInput
-            label="Main Thumbnail (Optional)"
-            placeholder="Select image"
-            accept="image/*"
-            onChange={(file) => file && handleThumbnailUpload({ target: { files: [file] } })}
-          />
-          {thumbnail && <Image src={thumbnail} height={200} mt="md" alt="preview" />}
+          <Title order={5} mb="xs">Thumbnail (Upload image OR YouTube URL)</Title>
+
+          <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
+
+            {/* URL input */}
+            <TextInput
+              style={{ flex: 1 }}
+              placeholder="Enter YouTube URL"
+              value={thumbnailUrl}
+              disabled={thumbnail && thumbnail.startsWith("data:image")}  // invalid URL after upload
+              onChange={(e) => {
+                const value = e.target.value;
+                setThumbnailUrl(value);
+
+                if (!value) {
+                  setThumbnail(null);
+                  setErrorMsg("");
+                  return;
+                }
+
+                const id = extractYoutubeId(value);
+                if (!id) {
+                  setErrorMsg("Invalid YouTube URL.");
+                  return;
+                }
+
+                setThumbnail(value);     // valid URL
+                setErrorMsg("");
+              }}
+            />
+
+            {/* file upload */}
+            <FileInput
+              placeholder="Upload"
+              accept="image/*"
+              disabled={thumbnail && extractYoutubeId(thumbnail)}  // invalid URL after upload
+              onChange={async (file) => {
+                if (file) {
+                  const base64 = await toBase64(file);
+                  setThumbnail(base64);
+                  setThumbnailUrl("");   // clear URL input
+                  setErrorMsg("");
+                }
+              }}
+              style={{ width: 120 }}
+            />
+
+            {/* Clear button */}
+            <Button
+              color="red"
+              variant="outline"
+              onClick={() => {
+                setThumbnail(null);     
+                setThumbnailUrl("");     
+                setErrorMsg("");         
+              }}
+              style={{ width: 80 }}
+            >
+              Clear
+            </Button>
+          </div>
+
+          {/* preview */}
+          {thumbnail && (
+            <div style={{ marginTop: 20, width: "100%" }}>
+              {thumbnail.startsWith("data:image") ? (
+                // image preview
+                <Image src={thumbnail} height={200} alt="thumbnail preview" />
+              ) : (
+                // YouTube preview
+                <iframe
+                  width="100%"
+                  height="300"
+                  src={`https://www.youtube.com/embed/${extractYoutubeId(thumbnail)}`}
+                  title="YouTube preview"
+                  allowFullScreen
+                  style={{ border: "none", borderRadius: 8 }}
+                ></iframe>
+              )}
+            </div>
+          )}
         </div>
   
         {/* upload gallery images */}
