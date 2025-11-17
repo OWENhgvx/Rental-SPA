@@ -1,20 +1,35 @@
-import {
-  Group,
-  Card,
-  Image,
-  Text,
-  Badge,
-  Rating,
-  ActionIcon,
-  Button,
-} from '@mantine/core';
+import { useState } from 'react';
+import {Group,Card,Image,Text,Badge,Rating,ActionIcon,Button} from '@mantine/core';
 import { useNavigate } from 'react-router-dom';
 import { IconEdit, IconTrash } from '@tabler/icons-react';
 
+function toYouTubeEmbedUrl(url) {
+  if (typeof url !== 'string') return null;
+
+  try {
+    const u = new URL(url);
+
+    if (u.hostname.includes('youtu.be')) {
+      const id = u.pathname.replace('/', '');
+      if (!id) return null;
+      return `https://www.youtube.com/embed/${id}`;
+    }
+
+    if (u.hostname.includes('youtube.com')) {
+      if (u.pathname.startsWith('/embed/')) return url;
+
+      const id = u.searchParams.get('v');
+      if (!id) return null;
+      return `https://www.youtube.com/embed/${id}`;
+    }
+
+    return null;
+  } catch {
+    return null;
+  }
+}
 
 function HouseCard({ onDelete, onRefresh, pageState, cardInfo }) {
-
-
   // detailed house info
   const {
     id,
@@ -24,84 +39,106 @@ function HouseCard({ onDelete, onRefresh, pageState, cardInfo }) {
     thumbnail,
     price,
     bedrooms,
+    beds,
     bathrooms,
     reviewsNum,
     rating,
     published,
-  }=cardInfo;
+  } = cardInfo;
 
-  const navigate=useNavigate();
+  const navigate = useNavigate();
 
   const safeReviews = reviewsNum ?? 0;
   const safeRating = typeof rating === 'number' ? rating : 0;
+
+  const [thumbHovered, setThumbHovered] = useState(false);
+
+  const isYouTubeThumb =
+    typeof thumbnail === 'string' &&
+    (thumbnail.includes('youtube.com') || thumbnail.includes('youtu.be'));
+
+  const embedUrl = isYouTubeThumb ? toYouTubeEmbedUrl(thumbnail) : null;
+
+  const currentYoutubeSrc = (() => {
+    if (!embedUrl) return null;
+    const base = embedUrl;
+    const autoPart = 'autoplay=1&mute=1&controls=0&rel=0';
+    if (!thumbHovered) return base;
+    if (base.includes('?')) return `${base}&${autoPart}`;
+    return `${base}?${autoPart}`;
+  })();
 
   // we got two  page state
   // if page state is dashboard, then we are in dashboard page
   // if page state is other value,we are in other page
 
-  const handleEditClick=(e)=>{
+  const handleEditClick = (e) => {
     e.stopPropagation();
     navigateEdit(id);
     // onEdit?.(id);
   };
 
-  const handleDeleteClick=(e)=>{
+  const handleDeleteClick = (e) => {
     e.stopPropagation();
     onDelete?.(id);
   };
 
   // navigate to house detail
-  
-  const navigateDetail=(id)=>{
-    if (pageState == 'guest'){
-      navigate(`/listings/${id}`)
+  const navigateDetail = (id) => {
+    if (pageState == 'guest') {
+      navigate(`/listings/${id}`);
       return;
-    } 
-    navigate(`/host/listings/${id}/requests`)
+    }
+    navigate(`/host/listings/${id}/requests`);
   };
 
   // navigate to house edit page
-  const navigateEdit=(id)=>{
-    navigate(`/host/listings/edit/${id}`)
+  const navigateEdit = (id) => {
+    navigate(`/host/listings/edit/${id}`);
   };
-  
+
   const handleTogglePublish = async (e) => {
     e.stopPropagation();
     const token = localStorage.getItem('token');
 
-    if (published){
-
+    if (published) {
       try {
-        const res = await fetch( `http://localhost:5005/listings/unpublish/${id}`, {
-          method: 'PUT',
-          headers: {
-            Authorization: `Bearer ${token}`,
-            'Content-Type': 'application/json',
+        const res = await fetch(
+          `http://localhost:5005/listings/unpublish/${id}`,
+          {
+            method: 'PUT',
+            headers: {
+              Authorization: `Bearer ${token}`,
+              'Content-Type': 'application/json',
+            },
+            body: null,
           },
-          body: null ,
-        });
+        );
 
         if (!res.ok) {
           const err = await res.json();
           throw new Error(err.error || 'Failed to toggle publish state');
         }
 
-        alert(published ? 'Listing unpublished successfully' : 'Listing published successfully');
+        alert(
+          published
+            ? 'Listing unpublished successfully'
+            : 'Listing published successfully',
+        );
         onRefresh?.();
       } catch (error) {
         alert(error.message);
       }
-    }else
-      navigate(`/host/listings/${id}/availability`)
-
-
+    } else {
+      navigate(`/host/listings/${id}/availability`);
+    }
   };
 
-  return(
+  return (
     <Card
-      onClick={()=>navigateDetail(id)}
-      shadow='sm'
-      radius='lg'
+      onClick={() => navigateDetail(id)}
+      shadow="sm"
+      radius="lg"
       withBorder
       style={{
         transition: 'transform 0.2s ease, box-shadow 0.2s ease',
@@ -113,16 +150,38 @@ function HouseCard({ onDelete, onRefresh, pageState, cardInfo }) {
         },
       }}
     >
-
-      <Card.Section pos="relative">
-        <Image
-          src={thumbnail}
-          alt="House image"
-          height={200}
-
-          fit="cover"
-          style={{ objectFit: 'cover', borderTopLeftRadius: '8px', borderTopRightRadius: '8px' }}
-        />
+      <Card.Section
+        pos="relative"
+        onMouseEnter={() => setThumbHovered(true)}
+        onMouseLeave={() => setThumbHovered(false)}
+      >
+        {isYouTubeThumb && embedUrl ? (
+          <iframe
+            src={currentYoutubeSrc}
+            title={title || 'Listing video'}
+            width="100%"
+            height={200}
+            style={{
+              border: 0,
+              borderTopLeftRadius: '8px',
+              borderTopRightRadius: '8px',
+            }}
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowFullScreen
+          />
+        ) : (
+          <Image
+            src={thumbnail}
+            alt="House image"
+            height={200}
+            fit="cover"
+            style={{
+              objectFit: 'cover',
+              borderTopLeftRadius: '8px',
+              borderTopRightRadius: '8px',
+            }}
+          />
+        )}
 
         {/* oberlay action icons for host page */}
         {pageState === 'host' && (
@@ -165,7 +224,12 @@ function HouseCard({ onDelete, onRefresh, pageState, cardInfo }) {
       </Text>
 
       <Group gap="xs" mt="xs">
-        <Badge>{bedrooms} BEDROOM</Badge>
+        <Badge>
+          {bedrooms} {bedrooms === 1 ? 'BEDROOM' : 'BEDROOMS'}
+        </Badge>
+        <Badge>
+          {beds} {beds === 1 ? 'BED' : 'BEDS'}
+        </Badge>
         <Badge>{bathrooms} BATHROOM</Badge>
         <Badge color="violet">${price}/night</Badge>
       </Group>
@@ -201,12 +265,12 @@ function HouseCard({ onDelete, onRefresh, pageState, cardInfo }) {
               }}
             >
               Edit Dates
-            </Button>)}
+            </Button>
+          )}
         </Group>
       )}
     </Card>
   );
-
 }
 
 export default HouseCard;
