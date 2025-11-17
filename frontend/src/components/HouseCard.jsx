@@ -12,7 +12,8 @@ import { useNavigate } from 'react-router-dom';
 import { IconEdit, IconTrash } from '@tabler/icons-react';
 
 
-function HouseCard({onDelete,pageState,cardInfo}){
+function HouseCard({ onDelete, onRefresh, pageState, cardInfo }) {
+
 
   // detailed house info
   const {
@@ -86,7 +87,7 @@ function HouseCard({onDelete,pageState,cardInfo}){
         }
 
         alert(published ? 'Listing unpublished successfully' : 'Listing published successfully');
-        window.location.reload();
+        onRefresh?.();
       } catch (error) {
         alert(error.message);
       }
@@ -182,7 +183,10 @@ function HouseCard({onDelete,pageState,cardInfo}){
         <Group mt="md" justify="center" gap="md">
           <Button
             color={published ? 'red' : 'green'}
-            onClick={handleTogglePublish}
+            onClick={(e) => {
+              e.stopPropagation();
+              handleTogglePublish(e);
+            }}
           >
             {published ? 'Unpublish' : 'Publish'}
           </Button>
