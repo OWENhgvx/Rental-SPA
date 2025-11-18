@@ -22,7 +22,6 @@ function CreatingListing() {
   const [thumbnailUrl, setThumbnailUrl] = useState('');
   const [jsonInputKey, setJsonInputKey] = useState(0);
 
-
   const jsonInputRef = useRef(null);
 
 
@@ -83,6 +82,13 @@ function CreatingListing() {
     const file = input.files && input.files[0];
     if (!file) return;
   
+    if (!file.name.toLowerCase().endsWith('.json')) {
+      resetFormFromJson();
+      setErrorMsg("Invalid file type: please upload a .json file.");
+      input.value = "";  
+      return;
+    }
+  
     try {
       const text = await file.text();
       let obj;
@@ -124,7 +130,6 @@ function CreatingListing() {
         }
       }
 
-  
       if (!m.propertyType) {
         resetFormFromJson();
         setErrorMsg("Invalid JSON: metadata.propertyType is required.");
@@ -182,8 +187,6 @@ function CreatingListing() {
       }
     }
 
-  
-      // 写入表单
       setTitle(obj.title);
       setAddress(obj.address);
       setPrice(obj.price);
@@ -197,14 +200,13 @@ function CreatingListing() {
       setImages(m.images || []);
   
       setErrorMsg("");
-
-      setJsonInputKey((k) => k + 1);   // ★ 强制 FileInput 重新挂载
+      setJsonInputKey((k) => k + 1);  
 
     } catch (err) {
       console.error(err);
       setErrorMsg("Failed to read JSON file.");
     } finally {
-      // ✅ 在最后再清空，这样可以重新选择同一个文件
+  
       if (jsonInputRef.current) {
         jsonInputRef.current.value = "";
       }
@@ -241,8 +243,7 @@ function CreatingListing() {
     if (isEditMode) fetchListing();
   }, [isEditMode, id]);
 
-
-  // 处理 YouTube URL 输入
+  // process thumbnail URL change
   const handleThumbnailUrlChange = (value) => {
     setThumbnailUrl(value);
 
@@ -342,7 +343,7 @@ function CreatingListing() {
             variant="outline"
             onClick={() => {
               resetFormFromJson();
-              setJsonInputKey((k) => k + 1); // 强制重置 FileInput
+              setJsonInputKey((k) => k + 1); 
             }}
             style={{ width: '100%' }}
           >

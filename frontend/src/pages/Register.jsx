@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Paper, TextInput, PasswordInput, Button, Text, Stack } from '@mantine/core';
 import { useNavigate } from 'react-router-dom';
 
+// Registration page
 function Register() {
   const navigate = useNavigate();
 
@@ -14,14 +15,11 @@ function Register() {
 
   const [errorMsg, setErrorMsg] = useState('');
 
-  const handleChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
-  };
-
+  // Handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(form.email)) {
       setErrorMsg("Invalid email format");
       return;
@@ -49,12 +47,12 @@ function Register() {
         throw new Error(data.error);
       }
 
-      // Registration success logic here
       localStorage.setItem('token', data.token);
       localStorage.setItem('email', form.email);
+
       navigate('/');
     } catch (err) {
-      setErrorMsg(err.message || 'Registration failed, please try again.');
+      setErrorMsg(err.message || 'Registration failed');
     }
   };
 
@@ -78,42 +76,48 @@ function Register() {
             <TextInput
               label="Email"
               name="email"
+              data-testid="email"
               placeholder="Enter your email"
               value={form.email}
-              onChange={handleChange}
+              onChange={(e) => setForm({ ...form, email: e.currentTarget.value })}
               required
             />
 
             <TextInput
               label="Username"
+              data-testid="name"
               name="name"
               placeholder="Enter your username"
               value={form.name}
-              onChange={handleChange}
+              onChange={(e) => setForm({ ...form, name: e.currentTarget.value })}
               required
             />
 
             <PasswordInput
               label="Password"
               name="password"
+              data-testid="password"
               placeholder="Enter password"
               value={form.password}
-              onChange={handleChange}
+              onChange={(e) => setForm({ ...form, password: e.currentTarget.value })}
               required
             />
 
             <PasswordInput
               label="Confirm Password"
               name="confirmPassword"
+              data-testid="confirmPassword"
               placeholder="Re-enter password"
               value={form.confirmPassword}
-              onChange={handleChange}
+              onChange={(e) =>
+                setForm({ ...form, confirmPassword: e.currentTarget.value })
+              }
               required
             />
 
             {errorMsg && <Text color="red">{errorMsg}</Text>}
 
-            <Button type="submit" fullWidth >
+            <Button type="submit" fullWidth>
               Register
             </Button>
           </Stack>
