@@ -3,6 +3,7 @@ import {Group,Card,Image,Text,Badge,Rating,ActionIcon,Button} from '@mantine/cor
 import { useNavigate } from 'react-router-dom';
 import { IconEdit, IconTrash } from '@tabler/icons-react';
 
+// import PropTypes from 'prop-types';
 function toYouTubeEmbedUrl(url) {
   if (typeof url !== 'string') return null;
 
@@ -47,18 +48,18 @@ function HouseCard({ onDelete, onRefresh, pageState, cardInfo }) {
   } = cardInfo;
 
   const navigate = useNavigate();
-
   const safeReviews = reviewsNum ?? 0;
   const safeRating = typeof rating === 'number' ? rating : 0;
-
   const [thumbHovered, setThumbHovered] = useState(false);
 
+  // check if thumbnail is a youtube url
   const isYouTubeThumb =
     typeof thumbnail === 'string' &&
     (thumbnail.includes('youtube.com') || thumbnail.includes('youtu.be'));
-
+ 
   const embedUrl = isYouTubeThumb ? toYouTubeEmbedUrl(thumbnail) : null;
 
+  // construct youtube embed url with autoplay if hovered
   const currentYoutubeSrc = (() => {
     if (!embedUrl) return null;
     const base = embedUrl;
@@ -68,16 +69,14 @@ function HouseCard({ onDelete, onRefresh, pageState, cardInfo }) {
     return `${base}?${autoPart}`;
   })();
 
-  // we got two  page state
-  // if page state is dashboard, then we are in dashboard page
-  // if page state is other value,we are in other page
-
+  // handle edit click
   const handleEditClick = (e) => {
     e.stopPropagation();
     navigateEdit(id);
     // onEdit?.(id);
   };
 
+  // handle delete click
   const handleDeleteClick = (e) => {
     e.stopPropagation();
     onDelete?.(id);
@@ -141,6 +140,7 @@ function HouseCard({ onDelete, onRefresh, pageState, cardInfo }) {
       radius="lg"
       withBorder
       style={{
+        cursor: 'pointer',
         transition: 'transform 0.2s ease, box-shadow 0.2s ease',
       }}
       sx={{
