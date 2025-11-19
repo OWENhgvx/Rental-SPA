@@ -378,4 +378,185 @@ describe('Unpublish a listing successfully', () => {
       cy.url().should('include', '/host/listings');
     });
   });
- 
+  
+
+
+// 6. Make a booking successfully
+describe('Make a booking successfully', () => {
+  beforeEach(() => {
+    // Fake login
+    window.localStorage.setItem('token', 'fake-token');
+    window.localStorage.setItem('email', 'guest@test.com');
+
+    // Polling mocks
+    cy.intercept('GET', '**/listings', {
+      statusCode: 200,
+      body: { listings: [] },
+    }).as('pollListings');
+
+    cy.intercept('GET', '**/bookings', {
+      statusCode: 200,
+      body: { bookings: {} },
+    }).as('pollBookings');
+  });
+
+  it('should make a booking successfully', () => {
+
+    // ---- 1) Mock GET listing detail for page ----
+    cy.intercept('GET', 'http://localhost:5005/listings/123', {
+      statusCode: 200,
+      body: {
+        listing: {
+          id: 123,
+          title: 'Cozy Apartment',
+          address: 'Sydney',
+          price: 200,
+          thumbnail:
+            'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAIAAAD8GO2jAAAAiUlEQVR4nGJxXcjFgA0cU2zAKp74YwZW8YVph7CKM2EVpSIYtWDUAsoBI+ePH1glLPalYxWPk/2KVdyp5SVW8aEfRKMWjAALWILtO7BKrO6ejVX8UokwVvG1O3Wwig/9IBq1YARYwKLB+xirhKWfMVbx1Q/mYBV3Ks3BKj70g2jUghFgASAAAP//NXMXvmLZcY0AAAAASUVORK5CYII=',
+          metadata: {
+            propertyType: 'Apartment',
+            bedrooms: 2,
+            beds: 2,
+            bathrooms: 1,
+            amenities: ['Wi-Fi'],
+            images: [],
+          },
+          reviews: [],
+          availability: [
+            { start: '2000-01-01', end: '2100-12-31' }   
+          ],
+        },
+      },
+    }).as('loadListing');
+
+    // ---- 2) Mock POST booking ----
+    cy.intercept('POST', '**/bookings/new/123', {
+      statusCode: 200,
+      body: { bookingId: 789 },
+    }).as('sendBooking');
+
+    // Stub alert (to verify success)
+    const alertStub = cy.stub();
+    cy.on('window:alert', alertStub);
+
+    // ---- 3) Visit booking page ----
+    cy.visit('http://localhost:3000/listings/123');
+
+    cy.wait('@loadListing');
+
+    // ---- 4) Open date picker ----
+    cy.contains('CHECK-IN').click();
+    cy.wait(300);
+
+    // ---- 5) Select start day (10) ----
+    cy.contains('button', /^10$/).click({ force: true });
+    cy.wait(200);
+
+    // ---- 6) Select end day (12) ----
+    cy.contains('button', /^12$/).click({ force: true });
+    cy.wait(200);
+
+    // Popover should close
+    cy.get('.mantine-Popover-dropdown').should('not.exist');
+
+    // ---- 7) Submit booking ----
+    cy.contains('Submit').click({ force: true });
+
+    // ---- 8) Booking request sent successfully ----
+    cy.wait('@sendBooking')
+      .its('response.statusCode')
+      .should('eq', 200);
+
+    // ---- 9) Alert should show "Send success!" ----
+    cy.wrap(null).then(() => {
+      expect(alertStub).to.have.been.calledWith('Send success!');
+    });
+  });
+});
+
+
+// 7. Logs out of the application successfully
+describe('Logout Happy Path', () => {
+  beforeEach(() => {
+    // login first
+    window.localStorage.setItem('token', 'fake-token');
+    window.localStorage.setItem('email', 'user@test.com');
+
+    // polling mocks
+    cy.intercept('GET', '**/listings', {
+      statusCode: 200,
+      body: { listings: [] },
+    }).as('pollListings');
+
+    cy.intercept('GET', '**/bookings', {
+      statusCode: 200,
+      body: { bookings: {} },
+    }).as('pollBookings');
+  });
+
+  it('should log out successfully', () => {
+    // go dashboard
+    cy.visit('http://localhost:3000/');
+
+    // make sure dashboard loaded
+    cy.contains('Logout').should('exist');
+
+    // click Logout
+    cy.contains('Logout').click();
+
+    // localStorage should be cleared
+    cy.wrap(null).then(() => {
+      expect(localStorage.getItem('token')).to.be.null;
+    });
+
+    // should redirect to login page
+    cy.url().should('include', '/login');
+
+    // basic login page check
+    cy.contains('Login').should('exist');
+  });
+});
+
+describe('Login Happy Path', () => {
+  it('should log in successfully and redirect to dashboard', () => {
+
+    // Mock POST login request
+    cy.intercept('POST', '**/user/auth/login', {
+      statusCode: 200,
+      body: { token: 'fake-token' },
+    }).as('login');
+
+    // Mock dashboard requests
+    cy.intercept('GET', '**/listings', {
+      statusCode: 200,
+      body: { listings: [] },
+    }).as('fetchListings');
+
+    cy.intercept('GET', '**/bookings', {
+      statusCode: 200,
+      body: { bookings: {} },
+    }).as('pollBookings');
+
+    // Visit login page
+    cy.visit('http://localhost:3000/login');
+
+    // Fill email and password
+    cy.get('input[placeholder="Enter your email"]').type('x@test.com');
+    cy.get('input[placeholder="Enter your password"]').type('123456');
+
+    // Submit form (avoid clicking guest login by mistake)
+    cy.get('button[type="submit"]').click();
+
+    // Wait for POST /user/auth/login to happen
+    cy.wait('@login');
+
+    // Should redirect to dashboard
+    cy.url().should('eq', 'http://localhost:3000/');
+
+    // Dashboard API calls
+    cy.wait('@fetchListings');
+    cy.wait('@pollBookings');
+
+    cy.contains('Search').should('exist');
+  });
+});
