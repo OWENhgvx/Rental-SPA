@@ -1,7 +1,7 @@
+/// <reference types="cypress" />
 /* eslint-env mocha */
-/* global cy */
+/* global cy, describe, it */
 
-import React from 'react';
 import { MantineProvider } from '@mantine/core';
 
 import '@mantine/core/styles.css';
@@ -19,16 +19,26 @@ const mountWithMantine = (node) =>
   );
 
 // generate a booking object with defaults
-const makeBooking = (id, { owner, listingId, start, end, status } = {}) => ({
-  id,
-  owner: owner ?? 'user@example.com',
-  listingId: listingId ?? 123,
-  status: status ?? 'accepted',
-  dateRange: {
-    start: start ?? '2025-01-01',
-    end: end ?? '2025-01-03',
-  },
-});
+const makeBooking = (id, overrides = {}) => {
+  const {
+    owner = 'user@example.com',
+    listingId = 123,
+    start = '2025-01-01',
+    end = '2025-01-03',
+    status = 'accepted',
+  } = overrides;
+
+  return {
+    id,
+    owner,
+    listingId,
+    status,
+    dateRange: {
+      start,
+      end,
+    },
+  };
+};
 
 // log in the user and stub fetch to return given bookings
 const setupLoggedInAndStubBookings = (
@@ -42,8 +52,8 @@ const setupLoggedInAndStubBookings = (
 
     const fetchStub = cy.stub(win, 'fetch').as('fetchBookings');
 
-    fetchStub.callsFake((url, options) => {
-      //only intercept /bookings API calls
+    fetchStub.callsFake((url) => {
+      // only intercept /bookings API calls
       if (typeof url === 'string' && url.includes('/bookings')) {
         if (shouldFail) {
           return Promise.resolve({
@@ -64,7 +74,7 @@ const setupLoggedInAndStubBookings = (
         });
       }
 
-      // for other URLs, do a normal fetch
+      // for other URLs, do a normal fetch (dummy)
       return Promise.resolve({
         ok: true,
         json: () => Promise.resolve({}),
@@ -116,10 +126,10 @@ describe('BookingStatusPanel component', () => {
     mountWithMantine(<BookingStatusPanel listingId={123} />);
 
     cy.contains('Your bookings').should('exist');
-
     cy.contains('Booking #101').should('exist');
     cy.contains('Booking #102').should('exist');
 
+    // for 1–2 bookings, details are shown inline, no toggle button
     cy.contains('Show details').should('not.exist');
   });
 

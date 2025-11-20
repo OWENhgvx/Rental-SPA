@@ -1,7 +1,7 @@
+/// <reference types="cypress" />
 /* eslint-env mocha */
-/* global cy */
+/* global cy, describe, it */
 
-import React from 'react';
 import { MantineProvider } from '@mantine/core';
 import { MemoryRouter } from 'react-router-dom';
 

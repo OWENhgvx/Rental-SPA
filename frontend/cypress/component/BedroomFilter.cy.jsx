@@ -1,4 +1,7 @@
-import React from 'react';
+/* eslint-env mocha */
+/* global cy, describe, it, expect */
+/// <reference types="cypress" />
+
 import { MantineProvider } from '@mantine/core';
 import BedFilter from '../../src/components/BedFilter.jsx';
 import '@mantine/core/styles.css';
@@ -20,19 +23,14 @@ describe('BedFilter component', () => {
     const onCommit = cy.spy().as('onCommit');
 
     mountWithMantine(
-      <BedFilter
-        onCommit={onCommit}
-        resetBed={0}
-        min={1}
-        max={5}
-      />,
+      <BedFilter onCommit={onCommit} resetBed={0} min={1} max={5} />,
     );
 
     cy.contains('Choose bedroom number').should('exist');
 
     cy.get('@onCommit').should('have.been.calledWith', {
       range: null,
-      sort: 'none', 
+      sort: 'none',
     });
   });
 
@@ -40,12 +38,7 @@ describe('BedFilter component', () => {
     const onCommit = cy.spy().as('onCommit');
 
     mountWithMantine(
-      <BedFilter
-        onCommit={onCommit}
-        resetBed={0}
-        min={1}
-        max={5}
-      />,
+      <BedFilter onCommit={onCommit} resetBed={0} min={1} max={5} />,
     );
 
     cy.contains('Choose bedroom number').click();
@@ -58,52 +51,47 @@ describe('BedFilter component', () => {
     const onCommit = cy.spy().as('onCommit');
 
     mountWithMantine(
-      <BedFilter
-        onCommit={onCommit}
-        resetBed={0}
-        min={1}
-        max={5}
-      />,
+      <BedFilter onCommit={onCommit} resetBed={0} min={1} max={5} />,
     );
 
-    //opne popover
+    // open popover
     cy.contains('Choose bedroom number').click();
 
     // none -> asc
     cy.contains('Sort: none').click();
     cy.contains('Sort: Bedroom low → high').should('exist');
-    cy.get('@onCommit').its('lastCall.args.0').then((payload) => {
-      expect(payload.sort).to.eq('asc');
-    });
+    cy.get('@onCommit')
+      .its('lastCall.args.0')
+      .then((payload) => {
+        expect(payload.sort).to.eq('asc');
+      });
 
     // asc -> desc
     cy.contains('Sort: Bedroom low → high').click();
     cy.contains('Sort: Bedroom high → low').should('exist');
-    cy.get('@onCommit').its('lastCall.args.0').then((payload) => {
-      expect(payload.sort).to.eq('desc');
-    });
+    cy.get('@onCommit')
+      .its('lastCall.args.0')
+      .then((payload) => {
+        expect(payload.sort).to.eq('desc');
+      });
 
     // desc -> none
     cy.contains('Sort: Bedroom high → low').click();
     cy.contains('Sort: none').should('exist');
-    cy.get('@onCommit').its('lastCall.args.0').then((payload) => {
-      expect(payload.sort).to.eq('none');
-    });
+    cy.get('@onCommit')
+      .its('lastCall.args.0')
+      .then((payload) => {
+        expect(payload.sort).to.eq('none');
+      });
   });
 
   it('shows active label after opening (Bedroom Number: …)', () => {
     mountWithMantine(
-      <BedFilter
-        onCommit={() => {}}
-        resetBed={0}
-        min={1}
-        max={3}
-      />,
+      <BedFilter onCommit={() => {}} resetBed={0} min={1} max={3} />,
     );
 
     cy.contains('Choose bedroom number').click();
 
-    // Move slider to 3
     cy.contains('Bedroom Number: 1–3+').should('exist');
   });
 });

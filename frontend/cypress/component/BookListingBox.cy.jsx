@@ -1,22 +1,22 @@
+/// <reference types="cypress" />
 /* eslint-env mocha */
-/* global cy */
+/* global cy, describe, it, beforeEach */
 
-import React from 'react';
 import { MantineProvider } from '@mantine/core';
 
 import '@mantine/core/styles.css';
 import '@mantine/notifications/styles.css';
 import '@mantine/dates/styles.css';
+
 import BookListingBox from '../../src/components/BookListingBox.jsx';
 
 // wrap cy.mount with MantineProvider
-const mountWithMantine = (node) => {
-  return cy.mount(
+const mountWithMantine = (node) =>
+  cy.mount(
     <MantineProvider withGlobalStyles withNormalizeCSS>
       {node}
     </MantineProvider>,
   );
-};
 
 // BookListingBox component tests
 describe('BookListingBox component', () => {

@@ -1,7 +1,7 @@
+/// <reference types="cypress" />
 /* eslint-env mocha */
-/* global cy */
+/* global cy, describe, it, beforeEach */
 
-import React from 'react';
 import { MantineProvider } from '@mantine/core';
 import { Notifications } from '@mantine/notifications';
 import { MemoryRouter } from 'react-router-dom';
@@ -13,8 +13,8 @@ import '@mantine/notifications/styles.css';
 import '@mantine/dates/styles.css';
 
 // Mantine + React Router wrapper
-const mountWithProviders = (node) => {
-  return cy.mount(
+const mountWithProviders = (node) =>
+  cy.mount(
     <MantineProvider withGlobalStyles withNormalizeCSS>
       <Notifications />
       <MemoryRouter>
@@ -22,7 +22,6 @@ const mountWithProviders = (node) => {
       </MemoryRouter>
     </MantineProvider>,
   );
-};
 
 describe('CommentBar component', () => {
   beforeEach(() => {
@@ -42,7 +41,6 @@ describe('CommentBar component', () => {
   });
 
   it('shows message when logged in but there are no accepted bookings', () => {
-
     cy.window().then((win) => {
       win.localStorage.setItem('token', 'fake-token');
       win.localStorage.setItem('email', 'test@example.com');
@@ -107,7 +105,7 @@ describe('CommentBar component', () => {
 
     // type into textarea and check character counter
     cy.contains('Your comment')
-      .parent() 
+      .parent()
       .find('textarea')
       .type('Nice stay!');
 
