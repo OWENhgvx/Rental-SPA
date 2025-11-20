@@ -107,33 +107,29 @@ export async function GetUnqiueListingBookingDetail(listingid,token){
 
 
 // send comment to this listing
-export async function SendComment(listingid,bookingid,token,rate,comment){
-
-  const res=await fetch(`${NET_ADDRESS}/listings/${listingid}/review/${bookingid}`,{
-
-    method: 'PUT',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization':token
+export async function SendComment(listingId, bookingId, token, rate, comment) {
+  const res = await fetch(
+    `${NET_ADDRESS}/listings/${listingId}/review/${bookingId}`,
+    {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: token,
+      },
+      body: JSON.stringify({
+        review: {
+          rating: Number(rate),
+          comment,
+          createdAt: new Date().toISOString(),
+        },
+      }),
     },
-    body:JSON.stringify({
-      review:{
-        rating: rate,
-        comment: comment,
-        createdAt: new Date().toISOString()
-      } 
-    })
-  });
+  );
+
+  const data = await res.json().catch(() => ({}));
 
   if (!res.ok) {
-    const data = await res.json().catch(() => ({}));
     throw new Error(data.error || 'Failed to send review');
-  }
-
-  const data=res.json();
-
-  if(!data.ok){
-    throw new Error(data.error);
   }
 
   return data;

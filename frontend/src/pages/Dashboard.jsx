@@ -84,11 +84,14 @@ export default function Dashboard() {
         const ids = (list || []).map((it) => it.id);
 
         const settled = await Promise.allSettled(
-          ids.map((id) => GetCardInfo(id))
+          ids.map((id) => GetCardInfo(id)),
         );
 
         const availableCards = settled
-          .filter((result) => result.status === 'fulfilled' && result.value.published)
+          .filter(
+            (result) =>
+              result.status === 'fulfilled' && result.value.published,
+          )
           .map((result) => result);
 
         const cards = availableCards
@@ -214,32 +217,32 @@ export default function Dashboard() {
     const sortFn = (a, b) => {
       if (filters.ratingSort === 'desc') {
         return Number(b.rating ?? 0) - Number(a.rating ?? 0);
-      } else if (filters.ratingSort === 'asc') {
+      }
+      if (filters.ratingSort === 'asc') {
         return Number(a.rating ?? 0) - Number(b.rating ?? 0);
       }
 
       if (priceSort === 'asc') {
         return Number(a.price ?? 0) - Number(b.price ?? 0);
-      } else if (priceSort === 'desc') {
+      }
+      if (priceSort === 'desc') {
         return Number(b.price ?? 0) - Number(a.price ?? 0);
       }
 
       if (bedSort === 'asc') {
         return Number(a.bedrooms ?? 0) - Number(b.bedrooms ?? 0);
-      } else if (bedSort === 'desc') {
+      }
+      if (bedSort === 'desc') {
         return Number(b.bedrooms ?? 0) - Number(a.bedrooms ?? 0);
       }
 
       return String(a.title || '').localeCompare(String(b.title || ''));
     };
 
-    priorityList.sort(sortFn);
+    const sortedPriority = [...priorityList].sort(sortFn);
+    const sortedNormal = [...normalList].sort(sortFn);
 
-    normalList.sort((a, b) =>
-      String(a.title || '').localeCompare(String(b.title || ''))
-    );
-
-    return [...priorityList, ...normalList];
+    return [...sortedPriority, ...sortedNormal];
   }, [allCards, filters, priorityListingIds]);
 
   return (

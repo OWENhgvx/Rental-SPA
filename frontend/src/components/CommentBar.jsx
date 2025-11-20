@@ -6,7 +6,7 @@ import { GetSuccessListingBookingDetail } from '../api/BookingApi.js';
 import { SendComment } from '../api/GetListingDetail.js';
 
 // CommentBar component
-export default function CommentBar({ listingId }) {
+export default function CommentBar({ listingId, onReviewSubmitted }) {
   const token = localStorage.getItem('token');
   const email = localStorage.getItem('email');
   const navigate = useNavigate();
@@ -62,8 +62,14 @@ export default function CommentBar({ listingId }) {
 
     try {
       await SendComment(listingId, bookingId, token, score, comment);
+
       setScore(0);
       setComment('');
+
+      if (typeof onReviewSubmitted === 'function') {
+        await onReviewSubmitted();
+      }
+
       notifications.show({ color: 'green', message: 'Review submitted.' });
     } catch (err) {
       notifications.show({
@@ -116,7 +122,8 @@ export default function CommentBar({ listingId }) {
         <Stack gap="sm" align="center">
           <Text fw={600}>Leave a review</Text>
           <Text size="sm" c="dimmed" ta="center">
-            Please login to view your bookings and leave a review for this listing.
+            Please login to view your bookings and leave a review for this
+            listing.
           </Text>
           <Button
             size="xs"
@@ -136,8 +143,8 @@ export default function CommentBar({ listingId }) {
         <Stack gap="sm" align="center">
           <Text fw={600}>Leave a review</Text>
           <Text size="sm" c="dimmed" ta="center">
-            You have not completed any accepted booking for this listing yet,
-            so you cannot leave a review.
+            You have not completed any accepted booking for this listing yet, so
+            you cannot leave a review.
           </Text>
         </Stack>
       </Card>

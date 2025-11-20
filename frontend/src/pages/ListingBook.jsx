@@ -28,8 +28,7 @@ export default function ListingBook() {
         setLoading(true);
         setErr(null);
         const raw = await GetListingDetail(listingId);
-        const l = raw ?? null;
-        if (!cancelled) setListingDetail(l);
+        if (!cancelled) setListingDetail(raw ?? null);
       } catch (e) {
         if (!cancelled) {
           setErr(e.message || 'Failed to load listing');
@@ -43,6 +42,15 @@ export default function ListingBook() {
       cancelled = true;
     };
   }, [listingId]);
+
+  const refreshListingAfterReview = async () => {
+    try {
+      const raw = await GetListingDetail(listingId);
+      setListingDetail(raw ?? null);
+    } catch (e) {
+      console.error('Failed to refresh listing after review', e);
+    }
+  };
 
   if (loading) return <Text c="dimmed">Loading…</Text>;
   if (err) return <Text c="red">{err}</Text>;
@@ -76,7 +84,7 @@ export default function ListingBook() {
           gap="md"
         >
           <Box
-            miw={500}
+            miw={400}
             style={{
               flex: 1,
               height: IMAGE_HEIGHT,
@@ -160,7 +168,10 @@ export default function ListingBook() {
           </Box>
         </Flex>
 
-        <CommentBar listingId={listingId} />
+        <CommentBar
+          listingId={listingId}
+          onReviewSubmitted={refreshListingAfterReview}
+        />
       </Stack>
     </Container>
   );
