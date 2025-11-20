@@ -1,6 +1,7 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
-import {Card,Title,Text,Button,Divider,Stack,Group,Loader,Alert,Table} from "@mantine/core";
+import {Card,Title,Text,Button,Divider,Stack,Group,Loader,Table} from "@mantine/core";
+import AppAlertModal from "../components/AppAlertModal";
 
 function ListingRequests() {
   const navigate = useNavigate();
@@ -12,6 +13,26 @@ function ListingRequests() {
   const [error, setError] = useState("");
 
   const token = localStorage.getItem("token");
+
+  const [alertState, setAlertState] = useState({
+    opened: false,
+    type: "info",
+    title: "",
+    message: "",
+  });
+
+  const openAlert = ({ type = "info", title = "", message = "" }) => {
+    setAlertState({
+      opened: true,
+      type,
+      title,
+      message,
+    });
+  };
+
+  const closeAlert = () => {
+    setAlertState((prev) => ({ ...prev, opened: false }));
+  };
 
   // Utility
   const getDayDiff = (start, end) =>
@@ -86,8 +107,14 @@ function ListingRequests() {
 
       setPendingRequests(related.filter((b) => b.status === "pending"));
       setHistory(related.filter((b) => b.status !== "pending"));
+      setError("");
     } catch (e) {
       setError(e.message);
+      openAlert({
+        type: "error",
+        title: "Error",
+        message: e.message || "Failed to load listing or bookings",
+      });
     } finally {
       setLoading(false);
     }
@@ -117,9 +144,18 @@ function ListingRequests() {
 
   if (error)
     return (
-      <Alert color="red" title="Error" mt="md">
-        {error}
-      </Alert>
+      <>
+        <Stack p="lg" spacing="xl">
+          <Text color="red">{error}</Text>
+        </Stack>
+        <AppAlertModal
+          opened={alertState.opened}
+          onClose={closeAlert}
+          type={alertState.type}
+          title={alertState.title}
+          message={alertState.message}
+        />
+      </>
     );
 
   if (!listing) return <Text>Listing not found.</Text>;
@@ -127,136 +163,143 @@ function ListingRequests() {
   const accepted = history.filter((b) => b.status === "accepted");
 
   return (
-    <Stack p="lg" spacing="xl">
-  
-      {/* 页面标题 */}
-      <Group position="apart">
-        <Title order={2}>Booking Management – {listing.title}</Title>
-        <Button variant="light" onClick={() => navigate(-1)}>
-          ← Back to Listings
-        </Button>
-      </Group>
-  
-      {/* 房源摘要卡片 */}
-      <Card shadow="sm" radius="md" withBorder p="lg">
-        <Stack spacing="xs">
-          <Group spacing="sm">
-            <Text size="lg" weight={600}>
-               Hosted by {listing.owner}
+    <>
+      <Stack p="lg" spacing="xl">
+        <Group position="apart">
+          <Title order={2}>Booking Management – {listing.title}</Title>
+          <Button variant="light" onClick={() => navigate(-1)}>
+            ← Back to Listings
+          </Button>
+        </Group>
+
+        <Card shadow="sm" radius="md" withBorder p="lg">
+          <Stack spacing="xs">
+            <Group spacing="sm">
+              <Text size="lg" weight={600}>
+                Hosted by {listing.owner}
+              </Text>
+            </Group>
+
+            <Text>
+              <b>Price per night:</b> ${listing.price}
             </Text>
-          </Group>
-  
-          <Text>
-            <b>Price per night:</b> ${listing.price}
-          </Text>
-          <Text>
-            <b>Days online:</b> {getDaysOnline(listing.postedOn)}
-          </Text>
-          <Text>
-            <b>Booked days this year:</b> {getBookedDaysThisYear(accepted)} days
-          </Text>
-          <Text>
-            <b>Earnings this year:</b> ${getTotalProfitThisYear(accepted)}
-          </Text>
-        </Stack>
-      </Card>
-  
-      <Divider my="md" />
-  
-      {/* Pending Requests */}
-      <Title order={3}>Pending Booking Requests</Title>
-      {pendingRequests.length === 0 ? (
-        <Text color="dimmed">No pending requests.</Text>
-      ) : (
-        <Table striped highlightOnHover   style={{ textAlign: "center" }}>
-          <colgroup>
-            <col span="1" style={{ width: "25%" }} />
-            <col span="1" style={{ width: "25%" }} />
-            <col span="1" style={{ width: "20%" }} />
-            <col span="1" style={{ width: "15%" }} />
-            <col span="1" style={{ width: "15%" }} />
-          </colgroup>
-          <thead>
-            <tr>
-              <th>Customer</th>
-              <th>Date Range</th>
-              <th>Total Price</th>
-              <th>Status</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {pendingRequests.map((req) => (
-              <tr key={req.id}>
-                <td>{req.owner || req.email}</td>
-                <td>
-                  {req.dateRange?.start} → {req.dateRange?.end}
-                </td>
-                <td>${req.totalPrice}</td>
-                <td>
-                  <Text color="orange">pending</Text>
-                </td>
-                <td style={{ textAlign: "right" }}>
-                  <Group position="right" spacing="xs">
-                    <Button
-                      color="green"
-                      size="xs"
-                      onClick={() => handleAction(req.id, "accept")}
-                    >
-                      Accept
-                    </Button>
-                    <Button
-                      color="red"
-                      size="xs"
-                      onClick={() => handleAction(req.id, "decline")}
-                    >
-                      Decline
-                    </Button>
-                  </Group>
-                </td>
+            <Text>
+              <b>Days online:</b> {getDaysOnline(listing.postedOn)}
+            </Text>
+            <Text>
+              <b>Booked days this year:</b>{" "}
+              {getBookedDaysThisYear(accepted)} days
+            </Text>
+            <Text>
+              <b>Earnings this year:</b> ${getTotalProfitThisYear(accepted)}
+            </Text>
+          </Stack>
+        </Card>
+
+        <Divider my="md" />
+
+        {/* Pending Requests */}
+        <Title order={3}>Pending Booking Requests</Title>
+        {pendingRequests.length === 0 ? (
+          <Text color="dimmed">No pending requests.</Text>
+        ) : (
+          <Table striped highlightOnHover style={{ textAlign: "center" }}>
+            <colgroup>
+              <col span="1" style={{ width: "25%" }} />
+              <col span="1" style={{ width: "25%" }} />
+              <col span="1" style={{ width: "20%" }} />
+              <col span="1" style={{ width: "15%" }} />
+              <col span="1" style={{ width: "15%" }} />
+            </colgroup>
+            <thead>
+              <tr>
+                <th>Customer</th>
+                <th>Date Range</th>
+                <th>Total Price</th>
+                <th>Status</th>
+                <th>Actions</th>
               </tr>
-            ))}
-          </tbody>
-        </Table>
-      )}
-  
-      <Divider my="md" />
-  
-      {/* Booking History */}
-      <Title order={3}>Booking History</Title>
-      {history.length === 0 ? (
-        <Text color="dimmed">No booking history.</Text>
-      ) : (
-        <Table striped style={{ textAlign: "center" }}>
-          <thead>
-            <tr>
-              <th>Customer</th>
-              <th>Date Range</th>
-              <th>Total Price</th>
-              <th>Status</th>
-            </tr>
-          </thead>
-          <tbody>
-            {history.map((req) => (
-              <tr key={req.id}>
-                <td>{req.owner || req.email}</td>
-                <td>
-                  {req.dateRange?.start} → {req.dateRange?.end}
-                </td>
-                <td>${req.totalPrice}</td>
-                <td>
-                  <Text color={req.status === "accepted" ? "green" : "red"}>
-                    {req.status}
-                  </Text>
-                </td>
+            </thead>
+            <tbody>
+              {pendingRequests.map((req) => (
+                <tr key={req.id}>
+                  <td>{req.owner || req.email}</td>
+                  <td>
+                    {req.dateRange?.start} → {req.dateRange?.end}
+                  </td>
+                  <td>${req.totalPrice}</td>
+                  <td>
+                    <Text color="orange">pending</Text>
+                  </td>
+                  <td style={{ textAlign: "right" }}>
+                    <Group position="right" spacing="xs">
+                      <Button
+                        color="green"
+                        size="xs"
+                        onClick={() => handleAction(req.id, "accept")}
+                      >
+                        Accept
+                      </Button>
+                      <Button
+                        color="red"
+                        size="xs"
+                        onClick={() => handleAction(req.id, "decline")}
+                      >
+                        Decline
+                      </Button>
+                    </Group>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </Table>
+        )}
+
+        <Divider my="md" />
+
+        {/* Booking History */}
+        <Title order={3}>Booking History</Title>
+        {history.length === 0 ? (
+          <Text color="dimmed">No booking history.</Text>
+        ) : (
+          <Table striped style={{ textAlign: "center" }}>
+            <thead>
+              <tr>
+                <th>Customer</th>
+                <th>Date Range</th>
+                <th>Total Price</th>
+                <th>Status</th>
               </tr>
-            ))}
-          </tbody>
-        </Table>
-      )}
-    </Stack>
+            </thead>
+            <tbody>
+              {history.map((req) => (
+                <tr key={req.id}>
+                  <td>{req.owner || req.email}</td>
+                  <td>
+                    {req.dateRange?.start} → {req.dateRange?.end}
+                  </td>
+                  <td>${req.totalPrice}</td>
+                  <td>
+                    <Text color={req.status === "accepted" ? "green" : "red"}>
+                      {req.status}
+                    </Text>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </Table>
+        )}
+      </Stack>
+
+      <AppAlertModal
+        opened={alertState.opened}
+        onClose={closeAlert}
+        type={alertState.type}
+        title={alertState.title}
+        message={alertState.message}
+      />
+    </>
   );
-  
 }
 
 export default ListingRequests;

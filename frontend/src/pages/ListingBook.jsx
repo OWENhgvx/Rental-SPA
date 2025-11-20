@@ -1,4 +1,3 @@
-// src/pages/ListingBook.jsx
 import { useEffect, useState } from 'react';
 import {Stack,Flex,Box,Group,Text,Badge,Rating,Title,Container} from '@mantine/core';
 import { GetListingDetail } from '../api/GetListingDetail.js';
@@ -123,7 +122,6 @@ export default function ListingBook() {
                 </Group>
               </Title>
 
-              {/* 永远只显示每晚价格 */}
               <Title size="md">Price per night:</Title>
               <Text>${pricePerNight}</Text>
 
