@@ -1,7 +1,6 @@
 /* eslint-env mocha */
-/* global cy */
+/* global cy, describe, it */
 
-import React from 'react';
 import { MantineProvider } from '@mantine/core';
 
 import '@mantine/core/styles.css';
@@ -10,7 +9,7 @@ import '@mantine/dates/styles.css';
 
 import ListingImageDisplay from '../../src/components/ListingImageDisplay.jsx';
 
-// genberate simple colored SVG data URLs for testing
+// generate simple colored SVG data URLs for testing
 const makeSvg = (color, label) =>
   'data:image/svg+xml;utf8,' +
   encodeURIComponent(
@@ -26,23 +25,25 @@ const IMG1 = makeSvg('#ff6b6b', 'Slide 1');
 const IMG2 = makeSvg('#1e90ff', 'Slide 2');
 const IMG3 = makeSvg('#2ecc71', 'Slide 3');
 
-const mountWithMantine = (node) => {
-  return cy.mount(
+const mountWithMantine = (node) =>
+  cy.mount(
     <MantineProvider withGlobalStyles withNormalizeCSS>
       {node}
     </MantineProvider>,
   );
-};
 
 describe('ListingImageDisplay component', () => {
   it('renders a single image slide when given a string URL', () => {
     mountWithMantine(<ListingImageDisplay images={IMG_COVER} />);
 
-    cy.get('img')
+    cy
+      .get('img')
       .first()
       .should('have.attr', 'src', IMG_COVER);
 
-    cy.get('button[class*="mantine-ActionIcon-root"]').should('have.length', 0);
+    cy
+      .get('button[class*="mantine-ActionIcon-root"]')
+      .should('have.length', 0);
   });
 
   it('renders an iframe for a YouTube watch URL', () => {
@@ -52,7 +53,8 @@ describe('ListingImageDisplay component', () => {
     mountWithMantine(<ListingImageDisplay images={watchUrl} />);
 
     cy.get('img').should('have.length', 0);
-    cy.get('iframe')
+    cy
+      .get('iframe')
       .should('exist')
       .and('have.attr', 'src')
       .and('include', expectedEmbed);
@@ -67,13 +69,16 @@ describe('ListingImageDisplay component', () => {
       <ListingImageDisplay images={[videoShortUrl, IMG_COVER]} />,
     );
 
-    cy.get('iframe')
+    cy
+      .get('iframe')
       .should('exist')
       .and('have.attr', 'src')
       .and('include', expectedEmbed);
     cy.get('img').should('have.length', 0);
 
-    cy.get('button[class*="mantine-ActionIcon-root"]').should('have.length', 2);
+    cy
+      .get('button[class*="mantine-ActionIcon-root"]')
+      .should('have.length', 2);
 
     const rightArrow = () =>
       cy.get('button[class*="mantine-ActionIcon-root"]').eq(1);
@@ -81,7 +86,8 @@ describe('ListingImageDisplay component', () => {
     rightArrow().click();
 
     cy.get('iframe').should('have.length', 0);
-    cy.get('img')
+    cy
+      .get('img')
       .first()
       .should('have.attr', 'src', IMG_COVER);
   });
@@ -91,11 +97,14 @@ describe('ListingImageDisplay component', () => {
 
     mountWithMantine(<ListingImageDisplay images={urls} />);
 
-    cy.get('img')
+    cy
+      .get('img')
       .first()
       .should('have.attr', 'src', IMG1);
 
-    cy.get('button[class*="mantine-ActionIcon-root"]').should('have.length', 2);
+    cy
+      .get('button[class*="mantine-ActionIcon-root"]')
+      .should('have.length', 2);
 
     const leftArrow = () =>
       cy.get('button[class*="mantine-ActionIcon-root"]').eq(0);
@@ -103,22 +112,26 @@ describe('ListingImageDisplay component', () => {
       cy.get('button[class*="mantine-ActionIcon-root"]').eq(1);
 
     rightArrow().click();
-    cy.get('img')
+    cy
+      .get('img')
       .first()
       .should('have.attr', 'src', IMG2);
 
     rightArrow().click();
-    cy.get('img')
+    cy
+      .get('img')
       .first()
       .should('have.attr', 'src', IMG3);
 
     rightArrow().click();
-    cy.get('img')
+    cy
+      .get('img')
       .first()
       .should('have.attr', 'src', IMG1);
 
     leftArrow().click();
-    cy.get('img')
+    cy
+      .get('img')
       .first()
       .should('have.attr', 'src', IMG3);
   });
