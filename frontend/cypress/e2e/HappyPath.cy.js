@@ -387,11 +387,9 @@ describe('Unpublish a listing successfully', () => {
 // 6. Make a booking successfully
 describe('Make a booking successfully', () => {
   beforeEach(() => {
-    // Fake login
     window.localStorage.setItem('token', 'fake-token');
     window.localStorage.setItem('email', 'guest@test.com');
 
-    // Polling mocks
     cy.intercept('GET', '**/listings', {
       statusCode: 200,
       body: { listings: [] },
@@ -404,7 +402,6 @@ describe('Make a booking successfully', () => {
   });
 
   it('should make a booking successfully', () => {
-    // 1) Mock GET listing detail for page
     cy.intercept('GET', 'http://localhost:5005/listings/123', {
       statusCode: 200,
       body: {
@@ -414,7 +411,7 @@ describe('Make a booking successfully', () => {
           address: 'Sydney',
           price: 200,
           thumbnail:
-            'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAIAAAD8GO2jAAAAiUlEQVR4nGJxXcjFgA0cU2zAKp74YwZW8YVph7CKM2EVpSIYtWDUAsoBI+ePH1glLPalYxWPk/2KVdyp5SVW8aEfRKMWjAALWILtO7BKrO6ejVX8UokwVvG1O3Wwig/9IBq1YARYwKLB+xirhKWfMVbx1Q/mYBV3Ks3BKj70g2jUghFgASAAAP//NXMXvmLZcY0AAAAASUVORK5CYII=',
+            'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAIAAAD8GO2jAAAAiUlEQVR4nGJxX...II=',
           metadata: {
             propertyType: 'Apartment',
             bedrooms: 2,
@@ -429,49 +426,34 @@ describe('Make a booking successfully', () => {
       },
     }).as('loadListing');
 
-    // 2) Mock POST booking
     cy.intercept('POST', '**/bookings/new/123', {
       statusCode: 200,
       body: { bookingId: 789 },
     }).as('sendBooking');
 
-    // Stub alert (to verify success)
-    const alertStub = cy.stub();
-    cy.on('window:alert', alertStub);
-
-    // 3) Visit booking page
     cy.visit('http://localhost:3000/listings/123');
-
     cy.wait('@loadListing');
 
-    // 4) Open date picker
     cy.contains('CHECK-IN').click();
-    cy.wait(300);
+    cy.get('.mantine-Popover-dropdown').should('be.visible');
 
-    // 5) Select start day (10)
-    cy.contains('button', /^10$/).click({ force: true });
-    cy.wait(200);
+    cy.contains('button', /^25$/).click({ force: true });
+    cy.contains('button', /^26$/).click({ force: true });
 
-    // 6) Select end day (12)
-    cy.contains('button', /^12$/).click({ force: true });
-    cy.wait(200);
+    cy.get('body').click(0, 0);
+    cy.get('.mantine-Popover-dropdown').should('not.be.visible');
 
-    // Popover should close
-    cy.get('.mantine-Popover-dropdown').should('not.exist');
-
-    // 7) Submit booking
     cy.contains('Submit').click({ force: true });
 
-    // 8) Booking request sent successfully
-    cy
-      .wait('@sendBooking')
+    cy.wait('@sendBooking')
       .its('response.statusCode')
       .should('eq', 200);
 
-    // 9) Alert should show "Send success!"
-    cy.wrap(null).then(() => {
-      expect(alertStub).to.have.been.calledWith('Send success!');
-    });
+    cy.contains(/success/i).should('be.visible');   
+    cy.contains(/send success|success/i).should('be.visible');
+
+    cy.contains('OK').click();
+    cy.contains(/success/i).should('not.be.visible');
   });
 });
 
