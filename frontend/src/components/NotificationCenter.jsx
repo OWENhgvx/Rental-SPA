@@ -32,7 +32,6 @@ export default function NotificationCenter() {
 
   const pushNotification = (notif) => {
     setNotifList((prev) => {
-      // 避免重复
       if (prev.some((n) => n.id === notif.id)) return prev;
       const next = [{ ...notif, read: false }, ...prev];
       try {
@@ -124,7 +123,6 @@ export default function NotificationCenter() {
           }
         });
 
-        // 更新基准到 localStorage
         localStorage.setItem(LS_PREV_GUEST_KEY, JSON.stringify(newGuestMap));
         localStorage.setItem(LS_PREV_HOST_KEY, JSON.stringify(newHostIds));
       } catch (err) {

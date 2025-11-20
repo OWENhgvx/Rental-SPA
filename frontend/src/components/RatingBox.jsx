@@ -1,17 +1,5 @@
-// src/components/RatingBox.jsx
 import { useMemo, useState } from 'react';
-import {
-  Card,
-  Group,
-  Stack,
-  Text,
-  Rating,
-  HoverCard,
-  Modal,
-  ScrollArea,
-  Divider,
-  Badge,
-} from '@mantine/core';
+import {Card,Group,Stack,Text,Rating,HoverCard,Modal,ScrollArea,Divider,Badge} from '@mantine/core';
 
 export default function RatingBox({ reviews = [] }) {
   const [opened, setOpened] = useState(false);

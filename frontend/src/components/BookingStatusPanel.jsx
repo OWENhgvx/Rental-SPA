@@ -119,7 +119,7 @@ export default function BookingStatusPanel({ listingId }) {
     );
   };
 
-  if (bookings.length <= 3) {
+  if (bookings.length <= 2) {
     return (
       <Card withBorder radius="md" mt="md" p="md">
         <Stack gap="xs">

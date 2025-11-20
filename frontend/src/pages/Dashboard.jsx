@@ -148,7 +148,7 @@ export default function Dashboard() {
   };
 
   const visible = useMemo(() => {
-    const prioritySet = new Set(priorityListingIds);
+    const prioritySet = new Set(priorityListingIds.map((id) => String(id)));
 
     let list = allCards.filter((c) => {
       if (!matchesQuery(c, filters.q)) return false;
@@ -199,13 +199,18 @@ export default function Dashboard() {
         ? filters.price.sort
         : 'none';
 
-    list.sort((a, b) => {
-      const aPriority = prioritySet.has(a.id);
-      const bPriority = prioritySet.has(b.id);
+    const priorityList = [];
+    const normalList = [];
 
-      if (aPriority && !bPriority) return -1;
-      if (!aPriority && bPriority) return 1;
+    list.forEach((card) => {
+      if (prioritySet.has(String(card.id))) {
+        priorityList.push(card);
+      } else {
+        normalList.push(card);
+      }
+    });
 
+    const sortFn = (a, b) => {
       if (filters.ratingSort === 'desc') {
         return Number(b.rating ?? 0) - Number(a.rating ?? 0);
       } else if (filters.ratingSort === 'asc') {
@@ -225,9 +230,15 @@ export default function Dashboard() {
       }
 
       return String(a.title || '').localeCompare(String(b.title || ''));
-    });
+    };
 
-    return list;
+    priorityList.sort(sortFn);
+
+    normalList.sort((a, b) =>
+      String(a.title || '').localeCompare(String(b.title || ''))
+    );
+
+    return [...priorityList, ...normalList];
   }, [allCards, filters, priorityListingIds]);
 
   return (
@@ -244,6 +255,7 @@ export default function Dashboard() {
               key={card.id}
               pageState="guest"
               cardInfo={card}
+              searchDates={filters.dates}
             />
           ))}
         </SimpleGrid>

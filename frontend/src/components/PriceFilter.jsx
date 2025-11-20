@@ -1,13 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Popover, Fieldset, Button, RangeSlider } from '@mantine/core';
 
-export default function PriceFilter({
-  onCommit,
-  resetPrice,
-  min=0,
-  max=2000,
-  step=50,
-}) {
+export default function PriceFilter({onCommit,resetPrice,min=0,max=2000,step=50,}) {
   const [opened, setOpened]=useState(false);
   const [active, setActive]=useState(false);
   const [range, setRange]=useState([null, null]);

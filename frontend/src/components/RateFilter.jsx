@@ -1,10 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Button} from '@mantine/core';
-import {
-  IconArrowsSort,
-  IconSortDescending,
-  IconSortAscending,
-} from '@tabler/icons-react';
+import {IconArrowsSort,IconSortDescending,IconSortAscending} from '@tabler/icons-react';
 
 
 function RateFilter({onCommit,resetRate}){

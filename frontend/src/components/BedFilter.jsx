@@ -1,13 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Popover, Fieldset, Button, RangeSlider } from '@mantine/core';
 
-export default function BedFilter({
-  onCommit,
-  resetBed,
-  min=0,
-  max=8,
-  step=1,
-}) {
+export default function BedFilter({onCommit,resetBed,min=0,max=8,step=1}) {
   const [opened, setOpened] = useState(false);
   const [active, setActive] = useState(false); 
   const [range, setRange]   = useState([null, null]);
