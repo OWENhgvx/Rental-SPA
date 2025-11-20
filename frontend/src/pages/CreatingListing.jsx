@@ -401,3 +401,196 @@ function CreatingListing() {
                 value={thumbnailUrl}
                 disabled={thumbnail && thumbnail.startsWith('data:image')}
                 onChange={(e) => handleThumbnailUrlChange(e.target.value)}
+              />
+              <FileInput
+                placeholder="Upload"
+                accept="image/*"
+                disabled={thumbnail && extractYoutubeId(thumbnail)}
+                onChange={handleThumbnailFileChange}
+                style={{ width: 140 }}
+              />
+              <Button
+                color="red"
+                variant="outline"
+                onClick={() => {
+                  setThumbnail(null);
+                  setThumbnailUrl('');
+                  setErrorMsg('');
+                }}
+                style={{ width: 90 }}
+              >
+                Clear
+              </Button>
+            </Group>
+          )}
+
+          {thumbnail && (
+            <Box mt={20} w="100%">
+              {thumbnail.startsWith('data:image') ? (
+                <Image src={thumbnail} h={isSmall ? 160 : 200} alt="thumbnail preview" />
+              ) : (
+                <iframe
+                  width="100%"
+                  height={isSmall ? 220 : 300}
+                  src={`https://www.youtube.com/embed/${extractYoutubeId(
+                    thumbnail,
+                  )}`}
+                  title="YouTube preview"
+                  allowFullScreen
+                  style={{ border: 'none', borderRadius: 8 }}
+                />
+              )}
+            </Box>
+          )}
+        </Box>
+
+        <Box {...fieldBoxProps}>
+          <FileInput
+            label="Gallery Images (Optional)"
+            labelProps={{ style: { fontWeight: 700 } }}
+            placeholder="Select images"
+            accept="image/*"
+            multiple
+            onChange={(files) =>
+              files && handleImagesUpload({ target: { files } })
+            }
+            w="100%"
+          />
+          <Group gap={10} wrap="wrap" mt={10}>
+            {images.map((img, idx) => (
+              <Image
+                key={idx}
+                src={img}
+                h={80}
+                w={80}
+                radius="sm"
+                alt={`gallery-${idx}`}
+              />
+            ))}
+          </Group>
+        </Box>
+
+        <Box {...fieldBoxProps}>
+          <TextInput
+            label="Title"
+            labelProps={{ style: { fontWeight: 700 } }}
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            required
+            w="100%"
+          />
+        </Box>
+
+        <Box {...fieldBoxProps}>
+          <TextInput
+            label="Address"
+            labelProps={{ style: { fontWeight: 700 } }}
+            value={address}
+            onChange={(e) => setAddress(e.target.value)}
+            required
+            w="100%"
+          />
+        </Box>
+
+        <Box {...fieldBoxProps}>
+          <NumberInput
+            label="Price per night (AUD)"
+            labelProps={{ style: { fontWeight: 700 } }}
+            value={price}
+            onChange={setPrice}
+            required
+            min={1}
+            w="100%"
+          />
+        </Box>
+
+        <Box {...fieldBoxProps}>
+          <Select
+            label="Property Type"
+            labelProps={{ style: { fontWeight: 700 } }}
+            placeholder="Select type"
+            data={['Apartment', 'House', 'Studio', 'Townhouse']}
+            value={propertyType}
+            onChange={setPropertyType}
+            required
+            w="100%"
+          />
+        </Box>
+
+        <Box {...fieldBoxProps}>
+          <Select
+            label="Bedrooms"
+            labelProps={{ style: { fontWeight: 700 } }}
+            data={['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '9+']}
+            value={toSelectValue(bedrooms)}
+            onChange={(v) => setBedrooms(v === '9+' ? 10 : Number(v))}
+            required
+            w="100%"
+          />
+        </Box>
+
+        <Box {...fieldBoxProps}>
+          <Select
+            label="Beds"
+            labelProps={{ style: { fontWeight: 700 } }}
+            data={['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '9+']}
+            value={toSelectValue(beds)}
+            onChange={(v) => setBeds(v === '9+' ? 10 : Number(v))}
+            required
+            w="100%"
+          />
+        </Box>
+
+        <Box {...fieldBoxProps}>
+          <Select
+            label="Bathrooms"
+            labelProps={{ style: { fontWeight: 700 } }}
+            data={['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '9+']}
+            value={toSelectValue(bathrooms)}
+            onChange={(v) => setBathroom(v === '9+' ? 10 : Number(v))}
+            required
+            w="100%"
+          />
+        </Box>
+
+        <Box {...fieldBoxProps}>
+          <MultiSelect
+            label="Amenities"
+            labelProps={{ style: { fontWeight: 700 } }}
+            data={[
+              'Wi-Fi',
+              'Parking',
+              'AC',
+              'Pool',
+              'Kitchen',
+              'Washer',
+              'Gym',
+              'Balcony',
+              'TV',
+            ]}
+            value={amenities}
+            onChange={setAmenities}
+            searchable
+            clearable
+            maxDropdownHeight={150}
+            w="100%"
+          />
+        </Box>
+
+        {errorMsg && (
+          <Box {...fieldBoxProps}>
+            <p style={{ color: 'red', margin: 0 }}>{errorMsg}</p>
+          </Box>
+        )}
+
+        <Box {...fieldBoxProps}>
+          <Button onClick={handleSubmit} fullWidth>
+            {isEditMode ? 'Save Changes' : 'Create Listing'}
+          </Button>
+        </Box>
+      </Stack>
+    </Container>
+  );
+}
+
+export default CreatingListing;
