@@ -216,3 +216,171 @@ describe('Publish a listing successfully', () => {
     }).as('pollBookings');
   });
 
+  it('should publish a listing successfully without selecting dates', () => {
+    // 1. Mock GET /listings so the host has exactly one listing
+    cy.intercept('GET', 'http://localhost:5005/listings', {
+      statusCode: 200,
+      body: {
+        listings: [{ id: 123, owner: 'host@test.com' }],
+      },
+    }).as('loadHostListings');
+
+    // 2. Mock GET /listings/123 (used by HouseCard / GetCardInfo)
+    cy.intercept('GET', 'http://localhost:5005/listings/123', {
+      statusCode: 200,
+      body: {
+        listing: {
+          id: 123,
+          title: 'My House',
+          address: 'Sydney',
+          price: 150,
+          thumbnail:
+            'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAIAAAD8GO2jAAAAiUlEQVR4nGJxXcjFgA0cU2zAKp74YwZW8YVph7CKM2EVpSIYtWDUAsoBI+ePH1glLPalYxWPk/2KVdyp5SVW8aEfRKMWjAALWILtO7BKrO6ejVX8UokwVvG1O3Wwig/9IBq1YARYwKLB+xirhKWfMVbx1Q/mYBV3Ks3BKj70g2jUghFgASAAAP//NXMXvmLZcY0AAAAASUVORK5CYII=',
+          published: false,
+          metadata: {
+            propertyType: 'Apartment',
+            bedrooms: 1,
+            beds: 1,
+            bathrooms: 1,
+            amenities: [],
+            images: [],
+          },
+          reviews: [],
+          availability: [],
+        },
+      },
+    }).as('loadCardInfo');
+
+    // 3. Visit host listings page
+    cy.visit('http://localhost:3000/host/listings');
+
+    cy.wait('@loadHostListings');
+    cy.wait('@loadCardInfo');
+
+    // Ensure the listing card is rendered correctly
+    cy.contains('My House').should('exist');
+    cy.contains('Publish').should('exist');
+
+    // 4. Click Publish → should navigate to Availability page
+    cy.contains('Publish').click();
+    cy.url().should('include', '/host/listings/123/availability');
+
+    // 5. Mock unpublish + publish APIs on Availability save
+    cy.intercept('PUT', '**/listings/unpublish/123', {
+      statusCode: 200,
+      body: {},
+    }).as('unpublish');
+
+    cy.intercept('PUT', '**/listings/publish/123', {
+      statusCode: 200,
+      body: {},
+    }).as('publish');
+
+    // 6. Click "Save & Publish" directly (no date range selection)
+    cy.contains('Save & Publish').click({ force: true });
+
+    // Wait for both API calls to be made
+    cy.wait('@unpublish');
+    cy.wait('@publish');
+
+    // 7. After saving, it should redirect back to host listings
+    cy.url().should('include', '/host/listings');
+  });
+});
+
+// 5. Unpublish a listing successfully
+describe('Unpublish a listing successfully', () => {
+  let isPublished = true; // track publish state inside the test
+
+  beforeEach(() => {
+    // Fake login info in localStorage
+    window.localStorage.setItem('token', 'fake-token');
+    window.localStorage.setItem('email', 'host@test.com');
+
+    // Mock bookings polling
+    cy.intercept('GET', '**/bookings', {
+      statusCode: 200,
+      body: { bookings: {} },
+    }).as('pollBookings');
+
+    // 1) Mock GET /listings  (host has one listing)
+    cy.intercept('GET', 'http://localhost:5005/listings', (req) => {
+      req.reply({
+        statusCode: 200,
+        body: {
+          listings: [{ id: 123, owner: 'host@test.com' }],
+        },
+      });
+    }).as('loadHostListings');
+
+    // 2) Mock GET /listings/123, with dynamic `published`
+    cy.intercept('GET', 'http://localhost:5005/listings/123', (req) => {
+      req.reply({
+        statusCode: 200,
+        body: {
+          listing: {
+            id: 123,
+            title: 'My House',
+            address: 'Sydney',
+            price: 150,
+            thumbnail:
+              'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAIAAAD8GO2jAAAAiUlEQVR4nGJxXcjFgA0cU2zAKp74YwZW8YVph7CKM2EVpSIYtWDUAsoBI+ePH1glLPalYxWPk/2KVdyp5SVW8aEfRKMWjAALWILtO7BKrO6ejVX8UokwVvG1O3Wwig/9IBq1YARYwKLB+xirhKWfMVbx1Q/mYBV3Ks3BKj70g2jUghFgASAAAP//NXMXvmLZcY0AAAAASUVORK5CYII=',
+            published: isPublished,
+            metadata: {
+              propertyType: 'Apartment',
+              bedrooms: 1,
+              beds: 1,
+              bathrooms: 1,
+              amenities: [],
+              images: [],
+            },
+            reviews: [],
+            availability: [],
+          },
+        },
+      });
+    }).as('loadCardInfo');
+
+    // 3) Mock PUT /listings/unpublish/123
+    cy.intercept('PUT', '**/listings/unpublish/123', (req) => {
+      // When unpublish succeeds, flip the flag
+      isPublished = false;
+      req.reply({
+        statusCode: 200,
+        body: {},
+      });
+    }).as('unpublish');
+  });
+
+  it('should unpublish a listing and toggle button to Publish', () => {
+    // 4) Visit host listings page
+    cy.visit('http://localhost:3000/host/listings');
+
+    cy.wait('@loadHostListings');
+    cy.wait('@loadCardInfo');
+
+    // 5) Ensure listing card shows Unpublish button at first
+    cy.contains('My House').should('exist');
+    cy.contains('Unpublish').should('exist');
+
+    // 6) Click Unpublish
+    cy.contains('Unpublish').click();
+
+    // 7) Ensure unpublish API is called successfully
+    cy
+      .wait('@unpublish')
+      .its('response.statusCode')
+      .should('eq', 200);
+
+    // 8) HouseCard refreshes data
+    cy.wait('@loadHostListings');
+    cy.wait('@loadCardInfo');
+
+    // 9) Now button text should be "Publish"
+    cy.contains('Publish').should('exist');
+
+    // 10) Still on host listings page
+    cy.url().should('include', '/host/listings');
+  });
+});
+
