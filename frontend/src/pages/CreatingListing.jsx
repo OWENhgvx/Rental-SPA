@@ -1,21 +1,9 @@
 import { useState, useEffect, useRef } from 'react';
-import {
-  Title,
-  TextInput,
-  NumberInput,
-  Select,
-  Button,
-  Image,
-  Stack,
-  MultiSelect,
-  FileInput,
-  Container,
-  Box,
-  Group,
-} from '@mantine/core';
+import {Title,TextInput,NumberInput,Select,Button,Image,Stack,MultiSelect,FileInput,Container,Box,Group,} from '@mantine/core';
 import { useMediaQuery } from '@mantine/hooks';
 import { useNavigate, useParams } from 'react-router-dom';
 
+// CreatingListing page 
 function CreatingListing() {
   const navigate = useNavigate();
   const { id } = useParams();
