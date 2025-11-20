@@ -5,6 +5,7 @@ import HouseCard from '../components/HouseCard';
 import { GetAllListing, GetCardInfo } from '../api/GetListingDetail.js';
 import { GetUserBookingDetail } from '../api/BookingApi.js';
 
+// Check if a card matches the search query
 function matchesQuery(card, q) {
   if (!q || !q.trim()) return true;
   const words = q.trim().toLowerCase().split(/\s+/);

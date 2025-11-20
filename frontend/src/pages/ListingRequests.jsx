@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import {Card,Title,Text,Button,Divider,Stack,Group,Loader,Table} from "@mantine/core";
 import AppAlertModal from "../components/AppAlertModal";
 
+// Listing Requests Management page
 function ListingRequests() {
   const navigate = useNavigate();
   const { listingId } = useParams();

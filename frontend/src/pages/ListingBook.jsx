@@ -8,6 +8,7 @@ import BookListingBox from '../components/BookListingBox.jsx';
 import CommentBar from '../components/CommentBar.jsx';
 import BookingStatusPanel from '../components/BookingStatusPanel.jsx';
 
+// Listing booking page
 export default function ListingBook() {
   const { listingId } = useParams();
   const { state } = useLocation();

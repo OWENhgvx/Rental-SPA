@@ -6,6 +6,7 @@ import ProfitChart from "../components/ProfitChart";
 import { GetAllListing, GetCardInfo } from '../api/GetListingDetail';
 import AppAlertModal from '../components/AppAlertModal';
 
+// Host Listings page
 function HostListings() {
   const navigate = useNavigate();
   const userEmail = localStorage.getItem('email');

@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Paper, TextInput, PasswordInput, Button, Text, Stack } from '@mantine/core';
 import { useNavigate } from 'react-router-dom';
 
+// Login page
 function Login() {
   const navigate = useNavigate();
   const [email, setEmail] = useState('');
