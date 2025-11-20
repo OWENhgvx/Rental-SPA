@@ -1,6 +1,6 @@
 const NET_ADDRESS="http://localhost:5005";
 
-
+//  get all listings
 export async function GetAllListing(){
 
   const res = await fetch(`${NET_ADDRESS}/listings`, {
@@ -16,7 +16,7 @@ export async function GetAllListing(){
   return data.listings ?? [];
 }
 
-
+// get listing detail by id
 export async function GetListingDetail(listingid){
 
   const res = await fetch(`${NET_ADDRESS}/listings/${listingid}`, {
