@@ -1,6 +1,7 @@
 import { Modal, Group, ThemeIcon, Text, Button } from '@mantine/core';
 import {IconAlertTriangle,IconCheck,IconInfoCircle} from '@tabler/icons-react';
 
+// Helper function to get configuration based on alert type
 function getTypeConfig(type) {
   switch (type) {
   case 'error':
@@ -12,6 +13,7 @@ function getTypeConfig(type) {
   }
 }
 
+// AppAlertModal component
 export default function AppAlertModal({
   opened,
   onClose,

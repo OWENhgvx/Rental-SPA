@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Popover, Fieldset, Button} from '@mantine/core';
 import { DatePicker } from '@mantine/dates';
 
+// DateFilter component
 export default function DateFilter({onCommit,resetDate}) {
 
   const [opened, setOpened] = useState(false);

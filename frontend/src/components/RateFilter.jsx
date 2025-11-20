@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Button} from '@mantine/core';
 import {IconArrowsSort,IconSortDescending,IconSortAscending} from '@tabler/icons-react';
 
-
+// RateFilter component
 function RateFilter({onCommit,resetRate}){
 
   // when set state to none it's normal state

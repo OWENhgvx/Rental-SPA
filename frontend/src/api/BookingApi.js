@@ -1,7 +1,6 @@
 const NET_ADDRESS="http://localhost:5005";
 
-
-
+// convert date to 'YYYY-MM-DD' format
 const toYMD = (d) => {
   if (!(d instanceof Date) || !Number.isFinite(d.getTime())) return null;
   const y = d.getFullYear();

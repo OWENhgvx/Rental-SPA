@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import {Title,TextInput,NumberInput,Select,Button,Image,Stack,MultiSelect,FileInput} from '@mantine/core';
 import { useNavigate, useParams } from 'react-router-dom';
 
+// Creating or editing a listing page
 function CreatingListing() {
   const navigate = useNavigate();
   const { id } = useParams(); // /listings/edit/:id → get id param

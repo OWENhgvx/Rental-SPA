@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import {LineChart,Line,CartesianGrid,XAxis,YAxis,Tooltip,ResponsiveContainer,ReferenceArea} from "recharts";
 
+// ProfitChart component
 function ProfitChart({ bookings = [] }) {
   const [data30, setData30] = useState([]);
 

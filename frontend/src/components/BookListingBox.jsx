@@ -6,6 +6,7 @@ import AppAlertModal from './AppAlertModal';
 
 const MS_PER_DAY = 1000 * 60 * 60 * 24;
 
+// Convert input to Date or null
 function toDate(x) {
   if (x instanceof Date) return Number.isFinite(x.getTime()) ? x : null;
   if (typeof x === 'number' || typeof x === 'string') {
@@ -14,12 +15,16 @@ function toDate(x) {
   }
   return null;
 }
+
+// Normalize range input to [Date|null, Date|null]
 function normalizeRange(r) {
   if (!Array.isArray(r)) return [null, null];
   const s = toDate(r[0]);
   const e = toDate(r[1]);
   return [s, e];
 }
+
+// Get milliseconds at midday for a date
 function middayMs(d) {
   return new Date(
     d.getFullYear(),
@@ -32,6 +37,7 @@ function middayMs(d) {
   ).getTime();
 }
 
+// Convert date to 'YYYY-MM-DD' format
 function dateToYMD(d) {
   const dt = d instanceof Date ? d : new Date(d);
   if (!(dt instanceof Date) || Number.isNaN(dt.getTime())) return '';
@@ -41,10 +47,12 @@ function dateToYMD(d) {
   return `${y}-${m}-${day}`;
 }
 
+// Check if ymd string is in range [start, end]
 function inRange(ymd, start, end) {
   return ymd >= start && ymd <= end;
 }
 
+// BookListingBox component
 export default function BookListingBox({
   daterange = [null, null],
   price,

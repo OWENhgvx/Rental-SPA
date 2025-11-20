@@ -1,4 +1,3 @@
-// src/components/CommentBar.jsx
 import { useEffect, useMemo, useState } from 'react';
 import {Card,Stack,Group,Select,Textarea,Button,Text,Rating} from '@mantine/core';
 import { notifications } from '@mantine/notifications';
@@ -6,6 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import { GetSuccessListingBookingDetail } from '../api/BookingApi.js';
 import { SendComment } from '../api/GetListingDetail.js';
 
+// CommentBar component
 export default function CommentBar({ listingId }) {
   const token = localStorage.getItem('token');
   const email = localStorage.getItem('email');

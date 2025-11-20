@@ -9,6 +9,7 @@ import '@mantine/notifications/styles.css';
 import '@mantine/dates/styles.css'; 
 import App from './App.jsx';
 
+// Render the main application
 createRoot(document.getElementById('root')).render(
   <StrictMode>
     <MantineProvider defaultColorScheme="light" theme={{ primaryColor: 'blue', defaultRadius: 'md' }}>

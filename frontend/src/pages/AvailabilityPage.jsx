@@ -7,6 +7,7 @@ import AppAlertModal from "../components/AppAlertModal";
 
 const NET_ADDRESS = "http://localhost:5005";
 
+// Availability management page
 function AvailabilityPage() {
   const { id } = useParams();
   const navigate = useNavigate();

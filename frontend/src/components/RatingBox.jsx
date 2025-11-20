@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
 import {Card,Group,Stack,Text,Rating,HoverCard,Modal,ScrollArea,Divider,Badge} from '@mantine/core';
 
+// RatingBox component
 export default function RatingBox({ reviews = [] }) {
   const [opened, setOpened] = useState(false);
   const [selectedStar, setSelectedStar] = useState(null);

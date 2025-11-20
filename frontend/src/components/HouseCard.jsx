@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { IconEdit, IconTrash } from '@tabler/icons-react';
 import AppAlertModal from './AppAlertModal';
 
+// Convert various YouTube URL formats to embed URL
 function toYouTubeEmbedUrl(url) {
   if (typeof url !== 'string') return null;
 

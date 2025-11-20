@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { Box, Image, ActionIcon } from '@mantine/core';
 import { IconChevronLeft, IconChevronRight } from '@tabler/icons-react';
 
+// Convert a string URL to a slide object
 function toSlideFromString(raw) {
   if (!raw || typeof raw !== 'string') return null;
   const url = raw.trim();

@@ -1,10 +1,10 @@
 import { AppShell, Burger, Group, UnstyledButton, Image } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import { useNavigate, Outlet } from 'react-router-dom';
-
 import logo from './Assets/logo.png';
 import NotificationCenter from './components/NotificationCenter';
 
+// Main layout component with header and navbar
 export default function Layout() {
   const [opened, { toggle }] = useDisclosure();
   const navigate = useNavigate();

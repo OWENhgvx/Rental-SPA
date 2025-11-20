@@ -8,6 +8,7 @@ const LS_NOTIF_KEY = 'airbrb_notifications_v1';
 const LS_PREV_GUEST_KEY = 'airbrb_prev_guest_bookings_v1';
 const LS_PREV_HOST_KEY = 'airbrb_prev_host_bookings_v1';
 
+//  NotificationCenter component
 export default function NotificationCenter() {
   const [notifList, setNotifList] = useState([]);
   useEffect(() => {

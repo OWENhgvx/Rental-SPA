@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Card, Stack, Text, Badge, Group, ScrollArea, Button, Popover } from '@mantine/core';
 import { GetListingBookingDetail } from '../api/BookingApi.js';
 
+//  Format date to a readable string
 function fmtDate(d) {
   if (!d) return '';
   const date = new Date(d);

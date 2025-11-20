@@ -1,4 +1,3 @@
-// import { useState } from 'react';
 import { Routes, Route} from 'react-router-dom';
 import Layout from './Layout';
 import Dashboard from './pages/Dashboard.jsx';
@@ -10,6 +9,7 @@ import HostListings from './pages/HostListings.jsx';
 import AvailabilityPage from './pages/AvailabilityPage.jsx';  
 import ListingBook from './pages/ListingBook.jsx';
 
+// Main application component with routing
 export default function App() {
   
   return (
