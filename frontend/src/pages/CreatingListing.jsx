@@ -1,12 +1,28 @@
 import { useState, useEffect, useRef } from 'react';
-import {Title,TextInput,NumberInput,Select,Button,Image,Stack,MultiSelect,FileInput} from '@mantine/core';
+import {
+  Title,
+  TextInput,
+  NumberInput,
+  Select,
+  Button,
+  Image,
+  Stack,
+  MultiSelect,
+  FileInput,
+  Container,
+  Box,
+  Group,
+} from '@mantine/core';
+import { useMediaQuery } from '@mantine/hooks';
 import { useNavigate, useParams } from 'react-router-dom';
 
-// Creating or editing a listing page
 function CreatingListing() {
   const navigate = useNavigate();
-  const { id } = useParams(); // /listings/edit/:id → get id param
+  const { id } = useParams();
   const isEditMode = Boolean(id);
+
+  const isSmall = useMediaQuery('(max-width: 768px)');
+  const isXs = useMediaQuery('(max-width: 480px)');
 
   const [title, setTitle] = useState('');
   const [address, setAddress] = useState('');
@@ -26,7 +42,6 @@ function CreatingListing() {
 
   const jsonInputRef = useRef(null);
 
-  // Convert File -> Base64
   const toBase64 = (file) =>
     new Promise((resolve, reject) => {
       const reader = new FileReader();
@@ -50,12 +65,9 @@ function CreatingListing() {
   };
 
   const isValidBase64Image = (str) => {
-    // must start with data URI scheme
     if (!/^data:image\/[a-zA-Z]+;base64,/.test(str)) return false;
-
     const base64Part = str.split(',')[1];
     try {
-      // try to decode
       atob(base64Part);
       return true;
     } catch {
@@ -69,14 +81,12 @@ function CreatingListing() {
     setPrice(100);
     setThumbnail(null);
     setThumbnailUrl('');
-
     setPropertyType('');
     setBathroom(1);
     setBedrooms(1);
     setBeds(1);
     setAmenities([]);
     setImages([]);
-
     setErrorMsg('');
   };
 
@@ -149,9 +159,7 @@ function CreatingListing() {
         typeof m.bathrooms !== 'number'
       ) {
         resetFormFromJson();
-        setErrorMsg(
-          'Invalid JSON: bedrooms/beds/bathrooms must be numbers.',
-        );
+        setErrorMsg('Invalid JSON: bedrooms/beds/bathrooms must be numbers.');
         return;
       }
 
@@ -217,7 +225,6 @@ function CreatingListing() {
     setImages(base64s);
   };
 
-  // load existing listing data in edit mode
   useEffect(() => {
     const fetchListing = async () => {
       try {
@@ -241,7 +248,6 @@ function CreatingListing() {
     if (isEditMode) fetchListing();
   }, [isEditMode, id]);
 
-  // process thumbnail URL change
   const handleThumbnailUrlChange = (value) => {
     setThumbnailUrl(value);
 
@@ -261,7 +267,6 @@ function CreatingListing() {
     setErrorMsg('');
   };
 
-  // thumbnail image upload
   const handleThumbnailFileChange = async (file) => {
     if (file) {
       const base64 = await toBase64(file);
@@ -271,7 +276,6 @@ function CreatingListing() {
     }
   };
 
-  // submit form
   const handleSubmit = async () => {
     if (!title || !address || !price || !propertyType) {
       setErrorMsg('Please fill all required fields.');
@@ -308,12 +312,8 @@ function CreatingListing() {
         let data = null;
         try {
           data = await res.json();
-        } catch {
-          // ignore parse error
-        }
-        throw new Error(
-          (data && data.error) || 'Failed to save listing.',
-        );
+        } catch {}
+        throw new Error((data && data.error) || 'Failed to save listing.');
       }
 
       navigate('/host/listings');
@@ -322,16 +322,17 @@ function CreatingListing() {
     }
   };
 
+  const fieldBoxProps = { w: '100%', maw: 600 };
+
   return (
-    <div style={{ width: '100vw', paddingTop: 40 }}>
-      <Title order={2} align="center" mb="lg">
+    <Container fluid px={isXs ? 12 : 24} py={40} style={{ minHeight: '100vh' }}>
+      <Title order={2} ta="center" mb="lg">
         {isEditMode ? 'Edit Listing' : 'Create New Listing'}
       </Title>
 
-      <Stack spacing="md" align="center">
-        {/* JSON upload */}
+      <Stack align="center" gap="md">
         {!isEditMode && (
-          <div style={{ width: 600 }}>
+          <Box {...fieldBoxProps}>
             <FileInput
               key={jsonInputKey}
               label="Upload Listing JSON (Optional)"
@@ -342,7 +343,7 @@ function CreatingListing() {
                 file && handleJsonUpload({ target: { files: [file] } })
               }
               ref={jsonInputRef}
-              style={{ width: '100%' }}
+              w="100%"
             />
 
             <Button
@@ -353,208 +354,50 @@ function CreatingListing() {
                 resetFormFromJson();
                 setJsonInputKey((k) => k + 1);
               }}
-              style={{ width: '100%' }}
+              fullWidth
             >
               Clear JSON
             </Button>
-          </div>
+          </Box>
         )}
 
-        {/* Thumbnail unified input */}
-        <div style={{ width: 600 }}>
+        <Box {...fieldBoxProps}>
           <Title order={5} mb="xs">
             Thumbnail (Upload image OR YouTube URL)
           </Title>
 
-          <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
-            {/* URL input */}
-            <TextInput
-              style={{ flex: 1 }}
-              placeholder="Enter YouTube URL"
-              value={thumbnailUrl}
-              disabled={thumbnail && thumbnail.startsWith('data:image')}
-              onChange={(e) => handleThumbnailUrlChange(e.target.value)}
-            />
-
-            {/* file upload */}
-            <FileInput
-              placeholder="Upload"
-              accept="image/*"
-              disabled={thumbnail && extractYoutubeId(thumbnail)}
-              onChange={handleThumbnailFileChange}
-              style={{ width: 120 }}
-            />
-
-            {/* Clear button */}
-            <Button
-              color="red"
-              variant="outline"
-              onClick={() => {
-                setThumbnail(null);
-                setThumbnailUrl('');
-                setErrorMsg('');
-              }}
-              style={{ width: 80 }}
-            >
-              Clear
-            </Button>
-          </div>
-
-          {/* preview */}
-          {thumbnail && (
-            <div style={{ marginTop: 20, width: '100%' }}>
-              {thumbnail.startsWith('data:image') ? (
-                // image preview
-                <Image src={thumbnail} height={200} alt="thumbnail preview" />
-              ) : (
-                // YouTube preview
-                <iframe
-                  width="100%"
-                  height="300"
-                  src={`https://www.youtube.com/embed/${extractYoutubeId(
-                    thumbnail,
-                  )}`}
-                  title="YouTube preview"
-                  allowFullScreen
-                  style={{ border: 'none', borderRadius: 8 }}
-                />
-              )}
-            </div>
-          )}
-        </div>
-
-        {/* upload gallery images */}
-        <div style={{ width: 600 }}>
-          <FileInput
-            label="Gallery Images (Optional)"
-            labelProps={{ style: { fontWeight: 700 } }}
-            placeholder="Select images"
-            accept="image/*"
-            multiple
-            onChange={(files) =>
-              files && handleImagesUpload({ target: { files } })
-            }
-          />
-          <div
-            style={{
-              display: 'flex',
-              gap: 10,
-              flexWrap: 'wrap',
-              marginTop: 10,
-            }}
-          >
-            {images.map((img, idx) => (
-              <Image
-                key={idx}
-                src={img}
-                height={80}
-                radius="sm"
-                alt={`gallery-${idx}`}
+          {isSmall ? (
+            <Stack gap="sm">
+              <TextInput
+                placeholder="Enter YouTube URL"
+                value={thumbnailUrl}
+                disabled={thumbnail && thumbnail.startsWith('data:image')}
+                onChange={(e) => handleThumbnailUrlChange(e.target.value)}
               />
-            ))}
-          </div>
-        </div>
-
-        {/* forms */}
-        <TextInput
-          label="Title"
-          labelProps={{ style: { fontWeight: 700 } }}
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-          required
-          style={{ width: 600 }}
-        />
-
-        <TextInput
-          label="Address"
-          labelProps={{ style: { fontWeight: 700 } }}
-          value={address}
-          onChange={(e) => setAddress(e.target.value)}
-          required
-          style={{ width: 600 }}
-        />
-
-        <NumberInput
-          label="Price per night (AUD)"
-          labelProps={{ style: { fontWeight: 700 } }}
-          value={price}
-          onChange={setPrice}
-          required
-          min={1}
-          style={{ width: 600 }}
-        />
-
-        <Select
-          label="Property Type"
-          labelProps={{ style: { fontWeight: 700 } }}
-          placeholder="Select type"
-          data={['Apartment', 'House', 'Studio', 'Townhouse']}
-          value={propertyType}
-          onChange={setPropertyType}
-          required
-          style={{ width: 600 }}
-        />
-
-        <Select
-          label="Bedrooms"
-          labelProps={{ style: { fontWeight: 700 } }}
-          data={['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '9+']}
-          value={toSelectValue(bedrooms)}
-          onChange={(v) => setBedrooms(v === '9+' ? 10 : Number(v))}
-          required
-          style={{ width: 600 }}
-        />
-
-        <Select
-          label="Beds"
-          labelProps={{ style: { fontWeight: 700 } }}
-          data={['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '9+']}
-          value={toSelectValue(beds)}
-          onChange={(v) => setBeds(v === '9+' ? 10 : Number(v))}
-          required
-          style={{ width: 600 }}
-        />
-
-        <Select
-          label="Bathrooms"
-          labelProps={{ style: { fontWeight: 700 } }}
-          data={['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '9+']}
-          value={toSelectValue(bathrooms)}
-          onChange={(v) => setBathroom(v === '9+' ? 10 : Number(v))}
-          required
-          style={{ width: 600 }}
-        />
-
-        <MultiSelect
-          label="Amenities"
-          labelProps={{ style: { fontWeight: 700 } }}
-          data={[
-            'Wi-Fi',
-            'Parking',
-            'AC',
-            'Pool',
-            'Kitchen',
-            'Washer',
-            'Gym',
-            'Balcony',
-            'TV',
-          ]}
-          value={amenities}
-          onChange={setAmenities}
-          searchable
-          clearable
-          maxDropdownHeight={150}
-          style={{ width: 600 }}
-        />
-
-        {errorMsg && <p style={{ color: 'red' }}>{errorMsg}</p>}
-
-        <Button onClick={handleSubmit} style={{ width: 600 }}>
-          {isEditMode ? 'Save Changes' : 'Create Listing'}
-        </Button>
-      </Stack>
-    </div>
-  );
-}
-
-export default CreatingListing;
+              <FileInput
+                placeholder="Upload"
+                accept="image/*"
+                disabled={thumbnail && extractYoutubeId(thumbnail)}
+                onChange={handleThumbnailFileChange}
+              />
+              <Button
+                color="red"
+                variant="outline"
+                onClick={() => {
+                  setThumbnail(null);
+                  setThumbnailUrl('');
+                  setErrorMsg('');
+                }}
+                fullWidth
+              >
+                Clear
+              </Button>
+            </Stack>
+          ) : (
+            <Group gap={10} align="center" wrap="nowrap">
+              <TextInput
+                style={{ flex: 1 }}
+                placeholder="Enter YouTube URL"
+                value={thumbnailUrl}
+                disabled={thumbnail && thumbnail.startsWith('data:image')}
+                onChange={(e) => handleThumbnailUrlChange(e.target.value)}
