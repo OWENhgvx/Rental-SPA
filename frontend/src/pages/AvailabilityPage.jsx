@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Container, Title, Button, Group, Paper, Text, Loader } from "@mantine/core";
+import {Container,Title,Button,Group,Paper,Text,Loader,Stack,Divider,Box,Badge,Card,} from "@mantine/core";
 import { DatePickerInput } from "@mantine/dates";
 import { useParams, useNavigate } from "react-router-dom";
 import { GetListingDetail } from "../api/GetListingDetail";
@@ -7,7 +7,6 @@ import AppAlertModal from "../components/AppAlertModal";
 
 const NET_ADDRESS = "http://localhost:5005";
 
-// Availability management page
 function AvailabilityPage() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -24,12 +23,7 @@ function AvailabilityPage() {
   });
 
   const openAlert = ({ type = "info", title = "", message = "" }) => {
-    setAlertState({
-      opened: true,
-      type,
-      title,
-      message,
-    });
+    setAlertState({ opened: true, type, title, message });
   };
 
   const closeAlert = () => {
@@ -47,7 +41,7 @@ function AvailabilityPage() {
         openAlert({
           type: "error",
           title: "Load failed",
-          message: "Failed to load listing details",
+          message: "Failed to load listing details.",
         });
       } finally {
         setLoading(false);
@@ -64,7 +58,7 @@ function AvailabilityPage() {
       openAlert({
         type: "error",
         title: "Invalid range",
-        message: "Please select both start and end dates",
+        message: "Please select both start and end dates.",
       });
       return;
     }
@@ -103,13 +97,13 @@ function AvailabilityPage() {
 
       if (!res.ok) {
         const err = await res.json();
-        throw new Error(err.error || "Failed to publish listing");
+        throw new Error(err.error || "Failed to publish listing.");
       }
 
       openAlert({
         type: "success",
         title: "Availability saved",
-        message: "Availability updated and listing re-published!",
+        message: "Availability updated and listing re-published.",
       });
       navigate("/host/listings");
     } catch (error) {
@@ -117,14 +111,14 @@ function AvailabilityPage() {
       openAlert({
         type: "error",
         title: "Save failed",
-        message: error.message || "Failed to save availability",
+        message: error.message || "Failed to save availability.",
       });
     }
   };
 
   if (loading) {
     return (
-      <Container mt="xl">
+      <Container size="sm" mt="xl">
         <Group justify="center">
           <Loader color="blue" />
         </Group>
@@ -171,55 +165,105 @@ function AvailabilityPage() {
   return (
     <>
       <Container size="sm" mt="xl">
-        <Title order={2} mb="lg">
+        <Title order={2} mb="xs">
           Manage Availability
         </Title>
 
-        <Group align="end" mb="md">
-          <DatePickerInput
-            type="range"
-            label="Select date range"
-            value={range}
-            onChange={setRange}
-            getDayProps={getDisabledDayProps}
-            minDate={new Date()}
-          />
+        <Text c="dimmed" mb="md">
+          Click the date input below to open the calendar. First click a start
+          date, then click an end date, and press Add to save the range. You can
+          also publish with no availability selected — your listing will still be
+          visible to users.
+        </Text>
 
-          <Button color="blue" onClick={addRange}>
-            Add
-          </Button>
-        </Group>
+        <Card withBorder radius="md" p="md" mb="lg">
+          <Text fw={600} mb={6}>
+            Add date range (optional)
+          </Text>
+          <Text size="sm" c="dimmed" mb="sm">
+            Click the input to open the calendar. Choose a start date, then an
+            end date.
+          </Text>
 
-        {availability.length === 0 ? (
-          <Text c="dimmed">No date ranges added yet.</Text>
-        ) : (
-          availability.map((r, i) => (
-            <Paper key={i} p="sm" mt="sm" withBorder radius="md">
-              <Group justify="space-between">
-                <Text>
-                  {new Date(r.start).toLocaleDateString()} →{" "}
-                  {new Date(r.end).toLocaleDateString()}
-                </Text>
+          <Stack gap="sm">
+            <DatePickerInput
+              type="range"
+              label="Select date range"
+              placeholder="Click to choose start and end dates"
+              description="You may leave this empty and publish"
+              value={range}
+              onChange={setRange}
+              getDayProps={getDisabledDayProps}
+              minDate={new Date()}
+              clearable
+            />
 
-                <Button
-                  size="xs"
-                  color="red"
-                  variant="light"
-                  onClick={() => removeRange(i)}
-                >
-                  Delete
-                </Button>
-              </Group>
-            </Paper>
-          ))
-        )}
+            <Group justify="flex-end" gap="sm">
+              <Button
+                variant="default"
+                onClick={() => setRange([null, null])}
+              >
+                Clear selection
+              </Button>
 
-        {/* save */}
-        <Group justify="center" mt="xl">
-          <Button color="green" onClick={handleSave}>
+              <Button color="blue" onClick={addRange}>
+                Add
+              </Button>
+            </Group>
+          </Stack>
+        </Card>
+
+        <Paper withBorder radius="md" p="md">
+          <Group justify="space-between" mb="sm">
+            <Text fw={600}>Current availability</Text>
+            <Badge variant="light">{availability.length} ranges</Badge>
+          </Group>
+
+          <Divider mb="sm" />
+
+          {availability.length === 0 ? (
+            <Text c="dimmed">
+              No date ranges yet. You can still publish without availability.
+            </Text>
+          ) : (
+            <Stack gap="sm">
+              {availability.map((r, i) => (
+                <Paper key={i} p="sm" withBorder radius="md">
+                  <Group justify="space-between" align="center" wrap="nowrap">
+                    <Box>
+                      <Text size="sm" c="dimmed">
+                        Range {i + 1}
+                      </Text>
+                      <Text>
+                        {new Date(r.start).toLocaleDateString()} →{" "}
+                        {new Date(r.end).toLocaleDateString()}
+                      </Text>
+                    </Box>
+
+                    <Button
+                      size="xs"
+                      color="red"
+                      variant="light"
+                      onClick={() => removeRange(i)}
+                    >
+                      Delete
+                    </Button>
+                  </Group>
+                </Paper>
+              ))}
+            </Stack>
+          )}
+        </Paper>
+
+        <Stack align="center" mt="xl" gap={6}>
+          <Button color="green" onClick={handleSave} w="100%">
             Save & Publish
           </Button>
-        </Group>
+          <Text size="sm" c="dimmed">
+            Publishing with empty availability is allowed and the listing will
+            still be visible.
+          </Text>
+        </Stack>
       </Container>
 
       <AppAlertModal
