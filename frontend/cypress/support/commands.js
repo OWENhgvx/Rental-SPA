@@ -25,12 +25,14 @@
 // Cypress.Commands.overwrite('visit', (originalFn, url, options) => { ... })
 
 
-Cypress.Commands.add('selectOption', (label, option) => {
-  
-    cy.contains(label).click({ force: true });
+/* global Cypress, cy */
 
-    //   Mantine v8 Select: data-combobox-option="true"
-    cy.get('[data-combobox-option="true"], [role="option"]')
-      .contains(option)
-      .click({ force: true });
-  });
+Cypress.Commands.add('selectOption', (label, option) => {
+  cy.contains(label).click({ force: true });
+
+  // Mantine v8 Select: data-combobox-option="true"
+  cy
+    .get('[data-combobox-option="true"], [role="option"]')
+    .contains(option)
+    .click({ force: true });
+});
