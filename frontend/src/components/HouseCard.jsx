@@ -1,9 +1,9 @@
 import { useState } from 'react';
-import {Group,Card,Image,Text,Badge,Rating,ActionIcon,Button} from '@mantine/core';
+import { Group, Card, Image, Text, Badge, Rating, ActionIcon, Button } from '@mantine/core';
 import { useNavigate } from 'react-router-dom';
 import { IconEdit, IconTrash } from '@tabler/icons-react';
+import AppAlertModal from './AppAlertModal';
 
-// import PropTypes from 'prop-types';
 function toYouTubeEmbedUrl(url) {
   if (typeof url !== 'string') return null;
 
@@ -30,8 +30,7 @@ function toYouTubeEmbedUrl(url) {
   }
 }
 
-function HouseCard({ onDelete, onRefresh, pageState, cardInfo }) {
-  // detailed house info
+function HouseCard({ onDelete, onRefresh, pageState, cardInfo, searchDates }) {
   const {
     id,
     title,
@@ -52,14 +51,32 @@ function HouseCard({ onDelete, onRefresh, pageState, cardInfo }) {
   const safeRating = typeof rating === 'number' ? rating : 0;
   const [thumbHovered, setThumbHovered] = useState(false);
 
-  // check if thumbnail is a youtube url
+  const [alertState, setAlertState] = useState({
+    opened: false,
+    type: 'info',
+    title: '',
+    message: '',
+  });
+
+  const openAlert = ({ type = 'info', title = '', message = '' }) => {
+    setAlertState({
+      opened: true,
+      type,
+      title,
+      message,
+    });
+  };
+
+  const closeAlert = () => {
+    setAlertState((prev) => ({ ...prev, opened: false }));
+  };
+
   const isYouTubeThumb =
     typeof thumbnail === 'string' &&
     (thumbnail.includes('youtube.com') || thumbnail.includes('youtu.be'));
- 
+
   const embedUrl = isYouTubeThumb ? toYouTubeEmbedUrl(thumbnail) : null;
 
-  // construct youtube embed url with autoplay if hovered
   const currentYoutubeSrc = (() => {
     if (!embedUrl) return null;
     const base = embedUrl;
@@ -69,36 +86,51 @@ function HouseCard({ onDelete, onRefresh, pageState, cardInfo }) {
     return `${base}?${autoPart}`;
   })();
 
-  // handle edit click
+  const navigateDetail = (id) => {
+    if (pageState === 'guest') {
+      const token = localStorage.getItem('token');
+
+      const hasRange =
+        token &&
+        Array.isArray(searchDates) &&
+        searchDates[0] &&
+        searchDates[1];
+
+      navigate(`/listings/${id}`, {
+        state: hasRange ? { dates: searchDates } : undefined,
+      });
+      return;
+    }
+
+    navigate(`/host/listings/${id}/requests`);
+  };
+
+  const navigateEdit = (listingId) => {
+    navigate(`/host/listings/edit/${listingId}`);
+  };
+
   const handleEditClick = (e) => {
     e.stopPropagation();
     navigateEdit(id);
-    // onEdit?.(id);
   };
 
-  // handle delete click
   const handleDeleteClick = (e) => {
     e.stopPropagation();
     onDelete?.(id);
   };
 
-  // navigate to house detail
-  const navigateDetail = (id) => {
-    if (pageState == 'guest') {
-      navigate(`/listings/${id}`);
-      return;
-    }
-    navigate(`/host/listings/${id}/requests`);
-  };
-
-  // navigate to house edit page
-  const navigateEdit = (id) => {
-    navigate(`/host/listings/edit/${id}`);
-  };
-
   const handleTogglePublish = async (e) => {
     e.stopPropagation();
     const token = localStorage.getItem('token');
+
+    if (!token) {
+      openAlert({
+        type: 'error',
+        title: 'Not logged in',
+        message: 'You must log in before changing publish state.',
+      });
+      return;
+    }
 
     if (published) {
       try {
@@ -110,7 +142,6 @@ function HouseCard({ onDelete, onRefresh, pageState, cardInfo }) {
               Authorization: `Bearer ${token}`,
               'Content-Type': 'application/json',
             },
-            body: null,
           },
         );
 
@@ -119,14 +150,18 @@ function HouseCard({ onDelete, onRefresh, pageState, cardInfo }) {
           throw new Error(err.error || 'Failed to toggle publish state');
         }
 
-        alert(
-          published
-            ? 'Listing unpublished successfully'
-            : 'Listing published successfully',
-        );
+        openAlert({
+          type: 'success',
+          title: 'Listing updated',
+          message: 'Listing unpublished successfully.',
+        });
         onRefresh?.();
       } catch (error) {
-        alert(error.message);
+        openAlert({
+          type: 'error',
+          title: 'Action failed',
+          message: error.message || 'Failed to toggle publish state.',
+        });
       }
     } else {
       navigate(`/host/listings/${id}/availability`);
@@ -134,142 +169,160 @@ function HouseCard({ onDelete, onRefresh, pageState, cardInfo }) {
   };
 
   return (
-    <Card
-      onClick={() => navigateDetail(id)}
-      shadow="sm"
-      radius="lg"
-      withBorder
-      style={{
-        cursor: 'pointer',
-        transition: 'transform 0.2s ease, box-shadow 0.2s ease',
-      }}
-      sx={{
-        '&:hover': {
-          transform: 'translateY(-4px)',
-          boxShadow: '0 8px 20px rgba(0,0,0,0.08)',
-        },
-      }}
-    >
-      <Card.Section
-        pos="relative"
-        onMouseEnter={() => setThumbHovered(true)}
-        onMouseLeave={() => setThumbHovered(false)}
+    <>
+      <Card
+        onClick={() => navigateDetail(id)}
+        shadow="sm"
+        radius="lg"
+        withBorder
+        style={{
+          cursor: 'pointer',
+          transition: 'transform 0.2s ease, box-shadow 0.2s ease',
+        }}
+        sx={{
+          '&:hover': {
+            transform: 'translateY(-4px)',
+            boxShadow: '0 8px 20px rgba(0, 0, 0, 0.08)',
+          },
+        }}
       >
-        {isYouTubeThumb && embedUrl ? (
-          <iframe
-            src={currentYoutubeSrc}
-            title={title || 'Listing video'}
-            width="100%"
-            height={200}
-            style={{
-              border: 0,
-              borderTopLeftRadius: '8px',
-              borderTopRightRadius: '8px',
-            }}
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-            allowFullScreen
-          />
-        ) : (
-          <Image
-            src={thumbnail}
-            alt="House image"
-            height={200}
-            fit="cover"
-            style={{
-              objectFit: 'cover',
-              borderTopLeftRadius: '8px',
-              borderTopRightRadius: '8px',
-            }}
-          />
-        )}
+        <Card.Section
+          pos="relative"
+          onMouseEnter={() => setThumbHovered(true)}
+          onMouseLeave={() => setThumbHovered(false)}
+        >
+          {isYouTubeThumb && embedUrl ? (
+            <iframe
+              src={currentYoutubeSrc}
+              title={title || 'Listing video'}
+              width="100%"
+              height={200}
+              style={{
+                border: 0,
+                borderTopLeftRadius: '8px',
+                borderTopRightRadius: '8px',
+              }}
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowFullScreen
+            />
+          ) : (
+            <Image
+              src={thumbnail}
+              alt="House image"
+              height={200}
+              fit="cover"
+              style={{
+                objectFit: 'cover',
+                borderTopLeftRadius: '8px',
+                borderTopRightRadius: '8px',
+              }}
+            />
+          )}
 
-        {/* oberlay action icons for host page */}
+          {pageState === 'host' && (
+            <Group pos="absolute" top={10} right={10} gap="xs">
+              <ActionIcon
+                variant="filled"
+                color="blue"
+                radius="xl"
+                size="lg"
+                title="Edit"
+                onClick={handleEditClick}
+                style={{ transition: 'transform 0.2s ease' }}
+                sx={{ '&:hover': { transform: 'scale(1.1)' } }}
+              >
+                <IconEdit size={22} />
+              </ActionIcon>
+              <ActionIcon
+                variant="filled"
+                color="red"
+                radius="xl"
+                size="lg"
+                title="Delete"
+                onClick={handleDeleteClick}
+                style={{ transition: 'transform 0.2s ease' }}
+                sx={{ '&:hover': { transform: 'scale(1.1)' } }}
+              >
+                <IconTrash size={22} />
+              </ActionIcon>
+            </Group>
+          )}
+        </Card.Section>
+
+        <Group justify="space-between" mt="sm">
+          <Text fw={600}>{title}</Text>
+          <Badge variant="light">{propertyType}</Badge>
+        </Group>
+
+        <Text c="dimmed" size="sm">
+          {address}
+        </Text>
+
+        <Badge
+          color="red"
+          mt={10}
+          size="md"
+          radius="lg"
+          variant="filled"
+          style={{
+            paddingInline: 14,
+            fontSize: '0.95rem',
+            fontWeight: 600,
+          }}
+        >
+          ${price}/night
+        </Badge>
+
+        <Group gap="xs" mt="xs">
+          <Badge>
+            {bedrooms} {bedrooms === 1 ? 'BEDROOM' : 'BEDROOMS'}
+          </Badge>
+          <Badge>
+            {beds} {beds === 1 ? 'BED' : 'BEDS'}
+          </Badge>
+          <Badge>{bathrooms} BATHROOM</Badge>
+
+        </Group>
+
+        <Group mt="sm" justify="center">
+          <Group gap={4}>
+            <Rating value={safeRating} fractions={2} readOnly size="sm" />
+            <Text size="sm" c="dimmed">
+              {safeRating.toFixed(2)} ({safeReviews} reviews)
+            </Text>
+          </Group>
+        </Group>
+
         {pageState === 'host' && (
-          <Group pos="absolute" top={10} right={10} gap="xs">
-            <ActionIcon
-              variant="filled"
-              color="blue"
-              radius="xl"
-              size="lg"
-              title="Edit"
-              onClick={handleEditClick}
-              style={{ transition: 'transform 0.2s ease' }}
-              sx={{ '&:hover': { transform: 'scale(1.1)' } }}
-            >
-              <IconEdit size={22} />
-            </ActionIcon>
-            <ActionIcon
-              variant="filled"
-              color="red"
-              radius="xl"
-              size="lg"
-              title="Delete"
-              onClick={handleDeleteClick}
-              style={{ transition: 'transform 0.2s ease' }}
-              sx={{ '&:hover': { transform: 'scale(1.1)' } }}
-            >
-              <IconTrash size={22} />
-            </ActionIcon>
+          <Group mt="md" justify="center" gap="md">
+            <Button color={published ? 'red' : 'green'} onClick={handleTogglePublish}>
+              {published ? 'Unpublish' : 'Publish'}
+            </Button>
+
+            {published === true && (
+              <Button
+                variant="outline"
+                color="blue"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  navigate(`/host/listings/${id}/availability`);
+                }}
+              >
+                Edit Dates
+              </Button>
+            )}
           </Group>
         )}
-      </Card.Section>
+      </Card>
 
-      <Group justify="space-between" mt="sm">
-        <Text fw={600}>{title}</Text>
-        <Badge variant="light">{propertyType}</Badge>
-      </Group>
-
-      <Text c="dimmed" size="sm">
-        {address}
-      </Text>
-
-      <Group gap="xs" mt="xs">
-        <Badge>
-          {bedrooms} {bedrooms === 1 ? 'BEDROOM' : 'BEDROOMS'}
-        </Badge>
-        <Badge>
-          {beds} {beds === 1 ? 'BED' : 'BEDS'}
-        </Badge>
-        <Badge>{bathrooms} BATHROOM</Badge>
-        <Badge color="violet">${price}/night</Badge>
-      </Group>
-
-      <Group mt="sm" justify="center">
-        <Group gap={4}>
-          <Rating value={safeRating} fractions={2} readOnly size="sm" />
-          <Text size="sm" c="dimmed">
-            {safeRating.toFixed(2)} ({safeReviews} reviews)
-          </Text>
-        </Group>
-      </Group>
-
-      {pageState === 'host' && (
-        <Group mt="md" justify="center" gap="md">
-          <Button
-            color={published ? 'red' : 'green'}
-            onClick={(e) => {
-              e.stopPropagation();
-              handleTogglePublish(e);
-            }}
-          >
-            {published ? 'Unpublish' : 'Publish'}
-          </Button>
-
-          {published === true && (
-            <Button
-              variant="outline"
-              color="blue"
-              onClick={(e) => {
-                e.stopPropagation();
-                navigate(`/host/listings/${id}/availability`);
-              }}
-            >
-              Edit Dates
-            </Button>
-          )}
-        </Group>
-      )}
-    </Card>
+      <AppAlertModal
+        opened={alertState.opened}
+        onClose={closeAlert}
+        type={alertState.type}
+        title={alertState.title}
+        message={alertState.message}
+      />
+    </>
   );
 }
 
