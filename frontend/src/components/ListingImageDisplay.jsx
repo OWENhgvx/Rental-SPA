@@ -31,7 +31,7 @@ function toSlideFromString(raw) {
   return { type: 'image', src: url };
 }
 
-export default function ListingImageDisplay({ images }) {
+export default function ListingImageDisplay({ images, height = 420 }) {
   const slides = (Array.isArray(images) ? images : images ? [images] : [])
     .map((item) => {
       if (typeof item === 'string') {
@@ -64,7 +64,7 @@ export default function ListingImageDisplay({ images }) {
       pos="relative"
       radius="md"
       style={{
-        height: 600,
+        height,
         width: '100%',
       }}
     >
