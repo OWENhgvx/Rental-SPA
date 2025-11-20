@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import HouseCard from '../components/HouseCard';
 import ProfitChart from "../components/ProfitChart";
 import { GetAllListing, GetCardInfo } from '../api/GetListingDetail';
+import AppAlertModal from '../components/AppAlertModal';
 
 function HostListings() {
   const navigate = useNavigate();
@@ -14,9 +15,28 @@ function HostListings() {
   const [houseNumber, setHouseNumber] = useState(0);
 
   const [bookings, setBookings] = useState([]);
-  const [myBookings, setMyBookings] = useState([]);  // 仅图表使用
+  const [myBookings, setMyBookings] = useState([]);
 
-  // 1) 拉取我的 listing（owner === 当前用户）
+  const [alertState, setAlertState] = useState({
+    opened: false,
+    type: 'info',
+    title: '',
+    message: '',
+  });
+
+  const openAlert = ({ type = 'info', title = '', message = '' }) => {
+    setAlertState({
+      opened: true,
+      type,
+      title,
+      message,
+    });
+  };
+
+  const closeAlert = () => {
+    setAlertState((prev) => ({ ...prev, opened: false }));
+  };
+
   async function fetchMyListings() {
     try {
       const allListings = await GetAllListing();
@@ -36,7 +56,6 @@ function HostListings() {
     }
   }
 
-  // 2) 拉取所有 bookings（暂不筛选）
   async function fetchBookings() {
     try {
       const token = localStorage.getItem("token");
@@ -54,7 +73,6 @@ function HostListings() {
     }
   }
 
-  // 3) 根据 myIds 从 bookings 中筛选属于我的
   useEffect(() => {
     if (myIds.length === 0) {
       setMyBookings([]);
@@ -68,13 +86,11 @@ function HostListings() {
     setMyBookings(mine);
   }, [myIds, bookings]);
 
-  // 4) 初始加载
   useEffect(() => {
     fetchMyListings();
     fetchBookings();
   }, [userEmail]);
 
-  // 删除房源
   const handleDelete = async (id) => {
     const ok = confirm('Are you sure?');
     if (!ok) return;
@@ -89,69 +105,90 @@ function HostListings() {
 
       if (!res.ok) {
         const err = await res.json();
-        alert(err.error || 'Delete failed');
+        openAlert({
+          type: 'error',
+          title: 'Delete failed',
+          message: err.error || 'Delete failed',
+        });
         return;
       }
 
-      alert('Delete complete');
+      openAlert({
+        type: 'success',
+        title: 'Delete complete',
+        message: 'Delete complete',
+      });
       fetchMyListings();
     } catch (err) {
       console.error(err);
-      alert('Delete error');
+      openAlert({
+        type: 'error',
+        title: 'Delete error',
+        message: 'Delete error',
+      });
     }
   };
 
-  // ====== UI ======
   return (
-    <Container fluid px={20}>
-      <Group position="apart" mb="md">
-        <Group>
-          <Title order={2}>My Host Listings</Title>
-          <Badge size="lg" radius="sm" color="blue">
-            {houseNumber} total
-          </Badge>
+    <>
+      <Container fluid px={20}>
+        <Group position="apart" mb="md">
+          <Group>
+            <Title order={2}>My Host Listings</Title>
+            <Badge size="lg" radius="sm" color="blue">
+              {houseNumber} total
+            </Badge>
+          </Group>
+
+          <Button
+            variant="filled"
+            color="green"
+            radius="md"
+            onClick={() => navigate('/host/create-listing')}
+          >
+            Create a new listing
+          </Button>
         </Group>
 
-        <Button
-          variant="filled"
-          color="green"
-          radius="md"
-          onClick={() => navigate('/host/create-listing')}
+        {/* Profit Chart */}
+        <div
+          style={{
+            height: "300px",
+            border: "1px dashed #aaa",
+            borderRadius: "8px",
+            marginBottom: "30px",
+            paddingTop: "20px",
+          }}
         >
-          Create a new listing
-        </Button>
-      </Group>
+          <ProfitChart bookings={myBookings} />
+        </div>
 
-      {/* Profit Chart */}
-      <div
-        style={{
-          height: "300px",
-          border: "1px dashed #aaa",
-          borderRadius: "8px",
-          marginBottom: "30px",
-          paddingTop: "20px",
-        }}
-      >
-        <ProfitChart bookings={myBookings} />
-      </div>
+        {/* Listing Cards */}
+        {listingDetails.length === 0 ? (
+          <Text c="dimmed">You have no listings yet.</Text>
+        ) : (
+          <SimpleGrid cols={{ base: 1, xs: 2, sm: 2, md: 3, xl: 4 }}>
+            {listingDetails.map((item) => (
+              <HouseCard
+                key={item.id}
+                onDelete={handleDelete}
+                onRefresh={fetchMyListings}
+                pageState="host"
+                cardInfo={item}
+              />
+            ))}
+          </SimpleGrid>
+        )}
+      </Container>
 
-      {/* Listing Cards */}
-      {listingDetails.length === 0 ? (
-        <Text c="dimmed">You have no listings yet.</Text>
-      ) : (
-        <SimpleGrid cols={{ base: 1, xs: 2, sm: 2, md: 3, xl: 4 }}>
-          {listingDetails.map((item) => (
-            <HouseCard
-              key={item.id}
-              onDelete={handleDelete}
-              onRefresh={fetchMyListings}   // 新增
-              pageState="host"
-              cardInfo={item}
-            />
-          ))}
-        </SimpleGrid>
-      )}
-    </Container>
+      <AppAlertModal
+        opened={alertState.opened}
+        onClose={closeAlert}
+        type={alertState.type}
+        title={alertState.title}
+        message={alertState.message}
+      />
+    </>
   );
 }
 

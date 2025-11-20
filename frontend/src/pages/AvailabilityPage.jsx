@@ -3,6 +3,7 @@ import { Container, Title, Button, Group, Paper, Text, Loader } from "@mantine/c
 import { DatePickerInput } from "@mantine/dates";
 import { useParams, useNavigate } from "react-router-dom";
 import { GetListingDetail } from "../api/GetListingDetail";
+import AppAlertModal from "../components/AppAlertModal";
 
 const NET_ADDRESS = "http://localhost:5005";
 
@@ -14,6 +15,26 @@ function AvailabilityPage() {
   const [range, setRange] = useState([null, null]);
   const [loading, setLoading] = useState(true);
 
+  const [alertState, setAlertState] = useState({
+    opened: false,
+    type: "info",
+    title: "",
+    message: "",
+  });
+
+  const openAlert = ({ type = "info", title = "", message = "" }) => {
+    setAlertState({
+      opened: true,
+      type,
+      title,
+      message,
+    });
+  };
+
+  const closeAlert = () => {
+    setAlertState((prev) => ({ ...prev, opened: false }));
+  };
+
   // Load availability from backend
   useEffect(() => {
     async function fetchData() {
@@ -22,7 +43,11 @@ function AvailabilityPage() {
         setAvailability(listing.availability || []);
       } catch (err) {
         console.error("Failed to fetch listing:", err);
-        alert("Failed to load listing details");
+        openAlert({
+          type: "error",
+          title: "Load failed",
+          message: "Failed to load listing details",
+        });
       } finally {
         setLoading(false);
       }
@@ -35,7 +60,11 @@ function AvailabilityPage() {
     const [start, end] = range;
 
     if (!start || !end) {
-      alert("Please select both start and end dates");
+      openAlert({
+        type: "error",
+        title: "Invalid range",
+        message: "Please select both start and end dates",
+      });
       return;
     }
 
@@ -76,11 +105,19 @@ function AvailabilityPage() {
         throw new Error(err.error || "Failed to publish listing");
       }
 
-      alert("Availability updated and listing re-published!");
+      openAlert({
+        type: "success",
+        title: "Availability saved",
+        message: "Availability updated and listing re-published!",
+      });
       navigate("/host/listings");
     } catch (error) {
       console.error("Error while saving:", error);
-      alert(error.message);
+      openAlert({
+        type: "error",
+        title: "Save failed",
+        message: error.message || "Failed to save availability",
+      });
     }
   };
 
@@ -90,6 +127,14 @@ function AvailabilityPage() {
         <Group justify="center">
           <Loader color="blue" />
         </Group>
+
+        <AppAlertModal
+          opened={alertState.opened}
+          onClose={closeAlert}
+          type={alertState.type}
+          title={alertState.title}
+          message={alertState.message}
+        />
       </Container>
     );
   }
@@ -123,57 +168,67 @@ function AvailabilityPage() {
   };
 
   return (
-    <Container size="sm" mt="xl">
-      <Title order={2} mb="lg">
-        Manage Availability
-      </Title>
+    <>
+      <Container size="sm" mt="xl">
+        <Title order={2} mb="lg">
+          Manage Availability
+        </Title>
 
-      <Group align="end" mb="md">
-        <DatePickerInput
-          type="range"
-          label="Select date range"
-          value={range}
-          onChange={setRange}
-          getDayProps={getDisabledDayProps}
-          minDate={new Date()}
-        />
+        <Group align="end" mb="md">
+          <DatePickerInput
+            type="range"
+            label="Select date range"
+            value={range}
+            onChange={setRange}
+            getDayProps={getDisabledDayProps}
+            minDate={new Date()}
+          />
 
-        <Button color="blue" onClick={addRange}>
-          Add
-        </Button>
-      </Group>
+          <Button color="blue" onClick={addRange}>
+            Add
+          </Button>
+        </Group>
 
-      {availability.length === 0 ? (
-        <Text c="dimmed">No date ranges added yet.</Text>
-      ) : (
-        availability.map((r, i) => (
-          <Paper key={i} p="sm" mt="sm" withBorder radius="md">
-            <Group justify="space-between">
-              <Text>
-                {new Date(r.start).toLocaleDateString()} →{" "}
-                {new Date(r.end).toLocaleDateString()}
-              </Text>
+        {availability.length === 0 ? (
+          <Text c="dimmed">No date ranges added yet.</Text>
+        ) : (
+          availability.map((r, i) => (
+            <Paper key={i} p="sm" mt="sm" withBorder radius="md">
+              <Group justify="space-between">
+                <Text>
+                  {new Date(r.start).toLocaleDateString()} →{" "}
+                  {new Date(r.end).toLocaleDateString()}
+                </Text>
 
-              <Button
-                size="xs"
-                color="red"
-                variant="light"
-                onClick={() => removeRange(i)}
-              >
-                Delete
-              </Button>
-            </Group>
-          </Paper>
-        ))
-      )}
+                <Button
+                  size="xs"
+                  color="red"
+                  variant="light"
+                  onClick={() => removeRange(i)}
+                >
+                  Delete
+                </Button>
+              </Group>
+            </Paper>
+          ))
+        )}
 
-      {/* save */}
-      <Group justify="center" mt="xl">
-        <Button color="green" onClick={handleSave}>
-          Save & Publish
-        </Button>
-      </Group>
-    </Container>
+        {/* save */}
+        <Group justify="center" mt="xl">
+          <Button color="green" onClick={handleSave}>
+            Save & Publish
+          </Button>
+        </Group>
+      </Container>
+
+      <AppAlertModal
+        opened={alertState.opened}
+        onClose={closeAlert}
+        type={alertState.type}
+        title={alertState.title}
+        message={alertState.message}
+      />
+    </>
   );
 }
 
