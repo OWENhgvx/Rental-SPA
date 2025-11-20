@@ -300,7 +300,9 @@ function CreatingListing() {
         let data = null;
         try {
           data = await res.json();
-        } catch {}
+        } catch (error) {
+          console.error('Error parsing response:', error);
+        }
         throw new Error((data && data.error) || 'Failed to save listing.');
       }
 
