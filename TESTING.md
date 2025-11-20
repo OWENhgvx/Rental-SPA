@@ -1,18 +1,30 @@
 # TESTING.md
 
-## How to Run the Tests
+# **How to Run the Tests**
 
-To run all Cypress tests:
+Install dependencies:
 
 ```bash
 npm install
+```
+
+### **Run E2E tests**
+
+```bash
+npm run cypress
+```
+
+This opens Cypress in **E2E mode** and allows you to run all end-to-end tests.
+
+------
+
+### **Run Component tests**
+
+```bash
 npm run test
 ```
 
-This will start Cypress and allow you to run:
-
-- **E2E tests** (Happy Path & Additional Path)
-- **Component tests**
+This opens Cypress in **Component Testing mode**.
 
 ---
 

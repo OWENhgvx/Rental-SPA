@@ -437,6 +437,8 @@ describe('Make a booking successfully', () => {
     cy.contains('CHECK-IN').click();
     cy.get('.mantine-Popover-dropdown').should('be.visible');
 
+    cy.get('button[data-direction="next"]').click();
+
     cy.contains('button', /^25$/).click({ force: true });
     cy.contains('button', /^26$/).click({ force: true });
 
