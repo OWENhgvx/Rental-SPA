@@ -258,16 +258,47 @@ app.put(
                        Running Server
 ***************************************************************/
 
+
+
+// app.get('/', (req, res) => res.redirect('/docs'));
+
+// app.use('/docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
+
+// const configData = JSON.parse(fs.readFileSync('../frontend/backend.config.json'));
+// const port = 'BACKEND_PORT' in configData ? configData.BACKEND_PORT : 5033;
+
+// const server = app.listen(port, () => {
+//   console.log(`Backend is now listening on port ${port}!`);
+//   console.log(`For API docs, navigate to http://localhost:${port}`);
+// });
+
+// export default server;
+
+
+/***************************************************************
+                       Running Server
+***************************************************************/
+
 app.get('/', (req, res) => res.redirect('/docs'));
 
 app.use('/docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
-const configData = JSON.parse(fs.readFileSync('../frontend/backend.config.json'));
-const port = 'BACKEND_PORT' in configData ? configData.BACKEND_PORT : 5033;
+// 优先读取 Render 提供的环境变量 PORT，本地默认为 5005
+let port = process.env.PORT || 5005; 
+
+try {
+  const configPath = '../frontend/backend.config.json';
+  // 只有当文件存在时才尝试读取，防止 ENOENT 错误搞崩溃服务器
+  if (fs.existsSync(configPath)) {
+    const configData = JSON.parse(fs.readFileSync(configPath));
+    port = 'BACKEND_PORT' in configData ? configData.BACKEND_PORT : port;
+  }
+} catch (err) {
+  console.log('Notice: Config file not found, using environment port.');
+}
 
 const server = app.listen(port, () => {
   console.log(`Backend is now listening on port ${port}!`);
-  console.log(`For API docs, navigate to http://localhost:${port}`);
 });
 
 export default server;
