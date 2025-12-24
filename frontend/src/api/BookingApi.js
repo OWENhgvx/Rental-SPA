@@ -1,4 +1,5 @@
 import { BACKEND_URL } from '../config';
+const NET_ADDRESS=`${BACKEND_URL}`;
 
 // convert date to 'YYYY-MM-DD' format
 const toYMD = (d) => {
