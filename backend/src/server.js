@@ -30,13 +30,22 @@ import {
   declineBooking,
 } from './service.js';
 
+// app.use(cors());
 const app = express();
 
-// app.use(cors());
+// --- 修改 CORS 配置 ---
 app.use(cors({
-  origin: 'https://rental-spa.vercel.app' 
+  origin: [
+    'https://rental-spa.vercel.app',            // 你的正式域名
+    /^https:\/\/rental-spa-.*\.vercel\.app$/,   // 允许所有 Vercel 自动生成的预览域名
+    'http://localhost:5005',                    // 允许本地 Vite 开发环境
+    'http://localhost:3000'                     // 允许本地其他开发环境
+  ],
+  credentials: true
 }));
-app.use(bodyParser.urlencoded({ extended: true }));
+// ----------------------
+
+app.use(bodyParser.urlencoded({ extended: true }))
 app.use(bodyParser.json({ limit: '50mb' }));
 app.use(morgan(':method :url :status'));
 
