@@ -10,7 +10,7 @@ const isLocalhost = Boolean(
 );
 
 // 把这里的地址改成你真实的 Render 后端地址
-const RENDER_BACKEND_URL = 'https://你的项目名.onrender.com';
+const RENDER_BACKEND_URL = 'https://rental-spa.onrender.com';
 
 export const BACKEND_URL = isLocalhost 
   ? 'http://localhost:5005' 
