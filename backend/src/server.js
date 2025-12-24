@@ -290,29 +290,13 @@ app.put(
 app.get('/', (req, res) => res.redirect('/docs'));
 app.use('/docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
-/**
- * 核心修复：
- * 1. 优先使用环境变量 process.env.PORT (Render 会自动分配，比如 10000)
- * 2. 只有在本地（没有环境变量）时，才去尝试读取配置文件或默认 5005
- */
-let port = process.env.PORT; 
-
-if (!port) { // 如果没有环境变量（说明是本地环境）
-  try {
-    const configPath = '../frontend/backend.config.json';
-    if (fs.existsSync(configPath)) {
-      const configData = JSON.parse(fs.readFileSync(configPath));
-      port = configData.BACKEND_PORT;
-    }
-  } catch (err) {
-    // 读取失败也没关系
-  }
-  port = port || 5005; // 本地保底端口
-}
+// 只留这一句！
+// 在 Render 上，它会拿到类似 10000 的端口
+// 在本地，它会使用 5005
+const port = process.env.PORT || 5005; 
 
 const server = app.listen(port, () => {
-  // 部署到 Render 后，这里打印出的应该是类似 10000 的数字
-  console.log(`✅ Backend is successfully running on port ${port}`);
+  console.log(`✅ Server is running on port ${port}`);
 });
 
 export default server;
