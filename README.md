@@ -2,7 +2,7 @@
 
 基于 **React 18** 和 **Mantine UI** 构建的高性能响应式房源租赁单页应用（SPA）。
 
-vercel部署网址：https://z5505892-airbrb-fe.vercel.app
+vercel部署网址：https://rental-spa.vercel.app/
 ---
 
 ## 🚀 项目概述
