@@ -285,7 +285,7 @@ function CreatingListing() {
     try {
       const url = isEditMode
         ? `${BACKEND_URL}/listings/${id}`
-        : `${BACKEND_URL}/listings/new'`;
+        : `${BACKEND_URL}/listings/new`;
       const method = isEditMode ? 'PUT' : 'POST';
 
       const res = await fetch(url, {
