@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Paper, TextInput, PasswordInput, Button, Text, Stack } from '@mantine/core';
 import { useNavigate } from 'react-router-dom';
+import { BACKEND_URL } from '../config';
 
 // Login page
 function Login() {
@@ -18,7 +19,7 @@ function Login() {
     }  
 
     try {
-      const res = await fetch('http://localhost:5005/user/auth/login', {
+      const res = await fetch(`${BACKEND_URL}/user/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password }),

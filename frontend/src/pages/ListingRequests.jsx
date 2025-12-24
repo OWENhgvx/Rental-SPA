@@ -2,6 +2,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import {Card,Title,Text,Button,Divider,Stack,Group,Loader,Table} from "@mantine/core";
 import AppAlertModal from "../components/AppAlertModal";
+import { BACKEND_URL } from '../config';
 
 // Listing Requests Management page
 function ListingRequests() {
@@ -71,7 +72,7 @@ function ListingRequests() {
 
       // 1. Fetch listing info
       const listingRes = await fetch(
-        `http://localhost:5005/listings/${listingId}`,
+        `${BACKEND_URL}/listings/${listingId}`,
         {
           method: "GET",
           headers: {
@@ -85,7 +86,7 @@ function ListingRequests() {
       setListing(listingData.listing);
 
       // 2. Fetch all bookings
-      const bookingsRes = await fetch(`http://localhost:5005/bookings`, {
+      const bookingsRes = await fetch(`${BACKEND_URL}/bookings`, {
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
@@ -122,7 +123,7 @@ function ListingRequests() {
   };
 
   const handleAction = async (bookingId, action) => {
-    await fetch(`http://localhost:5005/bookings/${action}/${bookingId}`, {
+    await fetch(`${BACKEND_URL}/bookings/${action}/${bookingId}`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",

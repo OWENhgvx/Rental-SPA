@@ -4,8 +4,9 @@ import { DatePickerInput } from "@mantine/dates";
 import { useParams, useNavigate } from "react-router-dom";
 import { GetListingDetail } from "../api/GetListingDetail";
 import AppAlertModal from "../components/AppAlertModal";
+import { BACKEND_URL } from '../config';
 
-const NET_ADDRESS = "http://localhost:5005";
+const NET_ADDRESS = `${BACKEND_URL}`;
 
 function AvailabilityPage() {
   const { id } = useParams();

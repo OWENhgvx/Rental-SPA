@@ -1,4 +1,5 @@
-const NET_ADDRESS="http://localhost:5005";
+import { BACKEND_URL } from '../config';
+const NET_ADDRESS=`${BACKEND_URL}`;
 
 //  get all listings
 export async function GetAllListing(){

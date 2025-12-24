@@ -3,6 +3,7 @@ import { Group, Card, Image, Text, Badge, Rating, ActionIcon, Button } from '@ma
 import { useNavigate } from 'react-router-dom';
 import { IconEdit, IconTrash } from '@tabler/icons-react';
 import AppAlertModal from './AppAlertModal';
+import { BACKEND_URL } from '../config';
 
 // Convert various YouTube URL formats to embed URL
 function toYouTubeEmbedUrl(url) {
@@ -136,7 +137,7 @@ function HouseCard({ onDelete, onRefresh, pageState, cardInfo, searchDates }) {
     if (published) {
       try {
         const res = await fetch(
-          `http://localhost:5005/listings/unpublish/${id}`,
+          `${BACKEND_URL}/listings/unpublish/${id}`,
           {
             method: 'PUT',
             headers: {

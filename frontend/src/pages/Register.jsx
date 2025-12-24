@@ -2,6 +2,8 @@ import { useState } from 'react';
 import { Paper, TextInput, PasswordInput, Button, Text, Stack } from '@mantine/core';
 import { useNavigate } from 'react-router-dom';
 import AppAlertModal from '../components/AppAlertModal'; 
+import { BACKEND_URL } from '../config';
+
 
 // Register component
 function Register() {
@@ -45,7 +47,7 @@ function Register() {
     }
 
     try {
-      const res = await fetch('http://localhost:5005/user/auth/register', {
+      const res = await fetch(`${BACKEND_URL}/user/auth/register`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

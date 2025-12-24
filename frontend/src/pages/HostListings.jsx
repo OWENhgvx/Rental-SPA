@@ -5,6 +5,7 @@ import HouseCard from '../components/HouseCard';
 import ProfitChart from "../components/ProfitChart";
 import { GetAllListing, GetCardInfo } from '../api/GetListingDetail';
 import AppAlertModal from '../components/AppAlertModal';
+import { BACKEND_URL } from '../config';
 
 // Host Listings page
 function HostListings() {
@@ -61,7 +62,7 @@ function HostListings() {
     try {
       const token = localStorage.getItem("token");
 
-      const res = await fetch("http://localhost:5005/bookings", {
+      const res = await fetch("${BACKEND_URL}/bookings", {
         headers: { Authorization: `Bearer ${token}` },
       });
 
@@ -99,7 +100,7 @@ function HostListings() {
     const token = localStorage.getItem('token');
 
     try {
-      const res = await fetch(`http://localhost:5005/listings/${id}`, {
+      const res = await fetch(`${BACKEND_URL}/listings/${id}`, {
         method: 'DELETE',
         headers: { Authorization: `Bearer ${token}` },
       });

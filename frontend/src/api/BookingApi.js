@@ -1,4 +1,4 @@
-const NET_ADDRESS="http://localhost:5005";
+import { BACKEND_URL } from '../config';
 
 // convert date to 'YYYY-MM-DD' format
 const toYMD = (d) => {

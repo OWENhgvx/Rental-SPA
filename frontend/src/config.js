@@ -1,4 +1,3 @@
-
 /**
  * 智能 API 地址切换
  * 无需依赖 Vercel 环境变量设置
@@ -14,6 +13,7 @@ const isLocalhost = hostname === 'localhost' || hostname === '127.0.0.1';
 const RENDER_BACKEND_URL = 'https://rental-spa.onrender.com';
 
 // 4. 导出最终地址
+// 修正：本地环境下直接写死 http://localhost:5005，不要引用变量名自身
 export const BACKEND_URL = isLocalhost 
   ? 'http://localhost:5005' 
   : RENDER_BACKEND_URL;

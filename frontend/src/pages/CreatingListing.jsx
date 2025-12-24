@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import {Title,TextInput,NumberInput,Select,Button,Image,Stack,MultiSelect,FileInput,Container,Box,Group,} from '@mantine/core';
 import { useMediaQuery } from '@mantine/hooks';
 import { useNavigate, useParams } from 'react-router-dom';
+import { BACKEND_URL } from '../config';
 
 // CreatingListing page 
 function CreatingListing() {
@@ -216,7 +217,7 @@ function CreatingListing() {
   useEffect(() => {
     const fetchListing = async () => {
       try {
-        const res = await fetch(`http://localhost:5005/listings/${id}`);
+        const res = await fetch(`${BACKEND_URL}/listings/${id}`);
         const data = await res.json();
         const l = data.listing;
         setTitle(l.title);
@@ -283,8 +284,8 @@ function CreatingListing() {
 
     try {
       const url = isEditMode
-        ? `http://localhost:5005/listings/${id}`
-        : 'http://localhost:5005/listings/new';
+        ? `${BACKEND_URL}/listings/${id}`
+        : `${BACKEND_URL}/listings/new'`;
       const method = isEditMode ? 'PUT' : 'POST';
 
       const res = await fetch(url, {
