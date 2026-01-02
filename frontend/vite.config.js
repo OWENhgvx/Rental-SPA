@@ -3,6 +3,7 @@ import { defineConfig } from 'vite'
 
 // https://vitejs.dev/config/
 export default defineConfig({
+  base: '/airbrb/', 
   plugins: [react()],
   test: {
     globals: true,

@@ -14,7 +14,7 @@ createRoot(document.getElementById('root')).render(
   <StrictMode>
     <MantineProvider defaultColorScheme="light" theme={{ primaryColor: 'blue', defaultRadius: 'md' }}>
       <Notifications position="top-right" />
-      <BrowserRouter>
+      <BrowserRouter basename="/airbrb">
         <App />
       </BrowserRouter>
     </MantineProvider>
